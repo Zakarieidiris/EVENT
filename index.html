@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dhacdooyinka — Event System</title>
+<title>Dhacdooyinka — QR System</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
@@ -12,202 +12,166 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --gold:#C9921A; --ink:#1A1209; --ink2:#3D2B0A; --muted:#7A6540;
-  --surface:#FFFDF7; --surface2:#F7F0E0; --border:#D4B97A; --red:#C0392B;
+  --surface:#FFFDF7; --border:#D4B97A; --green:#1A7A3D;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh}
 
-/* Auth Screens */
-#auth-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--ink); display: flex; align-items: center; justify-content: center;
-    z-index: 10000; flex-direction: column; color: white;
-}
-.auth-card { background: var(--ink2); padding: 2rem; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--gold); }
-
-.header{background:var(--ink);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.header{background:var(--ink);padding:1rem 1.5rem;display:flex;align-items:center;gap:12px}
 .header-logo{width:40px;height:40px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink);font-weight:800}
 .header-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:white}
 
-.tabs{display:flex;background:var(--ink2);padding:0 1rem; border-bottom: 2px solid var(--gold)}
-.tab{padding:1rem; font-family:'Syne',sans-serif;font-weight:600;font-size:13px;color:#8A7A5A;cursor:pointer; transition: 0.3s; display: flex; align-items:center; gap:6px}
-.tab.active{color:var(--gold); border-bottom: 3px solid var(--gold)}
-.admin-only { display: none; } /* Hidden by default */
+.tabs{display:flex;background:var(--ink2);padding:0 1rem;border-bottom:2px solid var(--gold)}
+.tab{padding:1rem;font-family:'Syne',sans-serif;font-weight:600;font-size:13px;color:#8A7A5A;cursor:pointer;display:flex;align-items:center;gap:6px}
+.tab.active{color:var(--gold);border-bottom:3px solid var(--gold)}
 
-.content{padding:1.5rem;max-width:860px;margin:0 auto;width:100%}
+.content{padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
 .panel{display:none}
 .panel.active{display:block}
 
-.card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
-input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin-top:5px; margin-bottom: 15px;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%}
+.card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center}
+input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin:10px 0 20px;font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%;transition:0.2s}
 .btn-gold{background:var(--gold);color:var(--ink)}
-.btn-outline{background:transparent; border: 1px solid var(--gold); color: var(--gold); margin-top: 10px;}
+.btn-outline{background:transparent;border:1.5px solid var(--gold);color:var(--gold);margin-top:10px}
 
-#reader { width: 100% !important; border-radius: 12px; overflow: hidden; }
-.scan-result { padding: 1rem; border-radius: 8px; margin-top: 10px; display: none; text-align: center; font-weight: bold;}
+#reader { width: 100% !important; border-radius: 12px; overflow: hidden; background: #000; }
+.scan-result { padding: 1.5rem; border-radius: 12px; margin-top: 15px; display: none; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
-<div id="auth-screen">
-    <div class="auth-card">
-        <h2 style="font-family:Syne; margin-bottom: 20px;">Dhacdooyinka</h2>
-        <p style="font-size: 14px; margin-bottom: 20px; color: #8A7A5A;">Access limited to authorized personnel</p>
-        <input type="password" id="admin-pass" placeholder="Enter Admin Password" style="text-align: center;">
-        <button class="btn btn-gold" onclick="checkAuth()">Login as Admin</button>
-        <button class="btn btn-outline" onclick="bypassToRegister()">Public Registration Only</button>
-    </div>
+<div class="header">
+    <div class="header-logo">QR</div>
+    <div class="header-title">Dhacdooyinka</div>
 </div>
 
-<div class="app">
-  <div class="header">
-    <div style="display:flex; align-items:center; gap:12px">
-        <div class="header-logo">QR</div>
-        <div class="header-title">Dhacdooyinka <span id="role-tag" style="font-size: 10px; color: var(--gold); border: 1px solid var(--gold); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">USER</span></div>
-    </div>
-    <button class="btn btn-outline btn-sm" style="width: auto; padding: 4px 10px;" onclick="location.reload()">Logout</button>
-  </div>
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('generate')"><i class="ti ti-qrcode"></i> 1. Create QR</div>
+    <div class="tab" onclick="switchTab('scanner')"><i class="ti ti-scan"></i> 2. Scan QR</div>
+</div>
 
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('generate')"><i class="ti ti-user-plus"></i> Register</div>
-    <div class="tab admin-only" onclick="switchTab('scanner')"><i class="ti ti-scan"></i> Scanner</div>
-    <div class="tab admin-only" onclick="switchTab('attendees')"><i class="ti ti-users"></i> Attendees</div>
-    <div class="tab admin-only" onclick="switchTab('stats')"><i class="ti ti-chart-bar"></i> Stats</div>
-  </div>
-
-  <div class="content">
+<div class="content">
     <div class="panel active" id="panel-generate">
-      <div class="card">
-        <h3>Register for Event</h3>
-        <label>Full Name</label>
-        <input type="text" id="f-name" placeholder="Enter name">
-        <label>Ticket Type</label>
-        <select id="f-type">
-          <option value="General">General Admission</option>
-          <option value="VIP">VIP</option>
-        </select>
-        <button class="btn btn-gold" onclick="generateQR()">Get Ticket</button>
-      </div>
+        <div class="card">
+            <h3 style="font-family:Syne;margin-bottom:15px">Create New Ticket</h3>
+            <label style="font-size:12px;text-transform:uppercase;font-weight:700;color:var(--muted)">Attendee Name</label>
+            <input type="text" id="f-name" placeholder="Enter Full Name">
+            
+            <label style="font-size:12px;text-transform:uppercase;font-weight:700;color:var(--muted)">Ticket Class</label>
+            <select id="f-type">
+                <option value="General">General Admission</option>
+                <option value="VIP">VIP Access</option>
+                <option value="Staff">Staff / Crew</option>
+            </select>
+            
+            <button class="btn btn-gold" onclick="generateQR()">
+                <i class="ti ti-plus"></i> Generate Ticket
+            </button>
+        </div>
 
-      <div class="card" id="qr-output" style="display:none; text-align:center;">
-        <div id="qr-canvas" style="display:flex; justify-content:center; margin-bottom: 1rem;"></div>
-        <h4 id="t-name"></h4>
-        <p id="t-id" style="color:var(--muted)"></p>
-        <button class="btn btn-outline" onclick="window.print()">Print Ticket</button>
-      </div>
+        <div class="card" id="qr-output" style="display:none">
+            <div id="qr-canvas" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
+            <h2 id="t-name" style="font-family:Syne;color:var(--ink2)"></h2>
+            <p id="t-type" style="color:var(--muted);font-weight:700;margin-bottom:15px"></p>
+            <button class="btn btn-outline" onclick="window.print()">
+                <i class="ti ti-printer"></i> Print or Save Ticket
+            </button>
+        </div>
     </div>
 
     <div class="panel" id="panel-scanner">
-      <div class="card" style="background: #000;">
-         <div id="reader"></div>
-      </div>
-      <div id="scan-result" class="scan-result"></div>
+        <div class="card" style="padding:10px; background:#000">
+            <div id="reader"></div>
+        </div>
+        
+        <div id="scan-result" class="scan-result">
+            <i class="ti ti-circle-check" style="font-size:40px;color:var(--green)"></i>
+            <h2 id="res-name" style="font-family:Syne;margin:10px 0 5px"></h2>
+            <p id="res-type" style="text-transform:uppercase;letter-spacing:1px;font-size:13px"></p>
+            <div style="margin-top:15px;padding-top:15px;border-top:1px solid rgba(0,0,0,0.1);font-size:12px;color:var(--muted)">
+                Ticket Verified Successfully
+            </div>
+        </div>
     </div>
-
-    <div class="panel" id="panel-attendees">
-        <div id="attendees-list"></div>
-    </div>
-  </div>
 </div>
 
 <script>
-const ADMIN_PASSWORD = "1234"; // CHANGE THIS PASSWORD
-let attendees = JSON.parse(localStorage.getItem('ev_data') || '[]');
 let html5QrCode = null;
-let isAdmin = false;
 
-function checkAuth() {
-    const pass = document.getElementById('admin-pass').value;
-    if(pass === ADMIN_PASSWORD) {
-        isAdmin = true;
-        document.getElementById('auth-screen').style.display = 'none';
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
-        document.getElementById('role-tag').textContent = "ADMIN";
-        toast("Welcome, Admin");
+function switchTab(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    
+    // Manage Camera
+    if(id === 'scanner') {
+        startScanner();
     } else {
-        alert("Incorrect Password");
+        if(html5QrCode) html5QrCode.stop();
+        document.getElementById('scan-result').style.display = 'none';
     }
 }
 
-function bypassToRegister() {
-    isAdmin = false;
-    document.getElementById('auth-screen').style.display = 'none';
-    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-    document.getElementById('role-tag').textContent = "PUBLIC";
-}
+function generateQR() {
+    const name = document.getElementById('f-name').value.trim();
+    const type = document.getElementById('f-type').value;
+    
+    if(!name) { alert("Please enter a name"); return; }
 
-function switchTab(id){
-  if(!isAdmin && id !== 'generate') return;
-  
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
-  
-  if(id === 'scanner') startScanner();
-  else if(html5QrCode) html5QrCode.stop();
-  
-  if(id === 'attendees') renderAttendees();
-}
+    // Store data inside the QR string as JSON
+    const qrData = JSON.stringify({ n: name, t: type });
 
-function generateQR(){
-  const name = document.getElementById('f-name').value;
-  const type = document.getElementById('f-type').value;
-  if(!name) return alert("Enter Name");
-
-  const id = 'TKT-' + Math.floor(Math.random()*10000);
-  const attendee = {id, name, type, checkedIn: false};
-  attendees.push(attendee);
-  localStorage.setItem('ev_data', JSON.stringify(attendees));
-
-  document.getElementById('qr-output').style.display = 'block';
-  document.getElementById('t-name').textContent = name;
-  document.getElementById('t-id').textContent = id;
-  
-  document.getElementById('qr-canvas').innerHTML = "";
-  new QRCode(document.getElementById('qr-canvas'), {
-      text: id, width: 150, height: 150
-  });
+    document.getElementById('qr-output').style.display = 'block';
+    document.getElementById('t-name').textContent = name;
+    document.getElementById('t-type').textContent = type + " TICKET";
+    
+    const canvas = document.getElementById('qr-canvas');
+    canvas.innerHTML = "";
+    new QRCode(canvas, {
+        text: qrData,
+        width: 200,
+        height: 200,
+        colorDark: "#1A1209",
+        colorLight: "#ffffff"
+    });
+    
+    // Scroll to view
+    document.getElementById('qr-output').scrollIntoView({behavior:'smooth'});
 }
 
 function startScanner() {
-  html5QrCode = new Html5Qrcode("reader");
-  html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-      verifyTicket(text);
-  });
+    html5QrCode = new Html5Qrcode("reader");
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+        try {
+            // Parse the data from the QR code
+            const data = JSON.parse(decodedText);
+            showResult(data);
+            
+            // Success sound
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play();
+        } catch(e) {
+            alert("Invalid QR Code Format");
+        }
+    }).catch(err => {
+        alert("Camera Access Required: " + err);
+    });
 }
 
-function verifyTicket(id) {
-    const attendee = attendees.find(a => a.id === id);
+function showResult(data) {
     const res = document.getElementById('scan-result');
     res.style.display = 'block';
+    res.style.background = "#D4F0DF"; // Success Green
+    res.style.border = "2px solid var(--green)";
     
-    if(!attendee) {
-        res.textContent = "INVALID TICKET";
-        res.style.background = "#FADDDA";
-    } else if(attendee.checkedIn) {
-        res.textContent = "ALREADY CHECKED IN: " + attendee.name;
-        res.style.background = "#FFF3CD";
-    } else {
-        attendee.checkedIn = true;
-        localStorage.setItem('ev_data', JSON.stringify(attendees));
-        res.textContent = "SUCCESS: " + attendee.name;
-        res.style.background = "#D4F0DF";
-    }
+    document.getElementById('res-name').textContent = data.n;
+    document.getElementById('res-type').textContent = data.t;
 }
-
-function renderAttendees() {
-    const list = document.getElementById('attendees-list');
-    list.innerHTML = attendees.map(a => `
-        <div class="card" style="display:flex; justify-content:space-between">
-            <div><b>${a.name}</b><br><small>${a.id}</small></div>
-            <span style="color:${a.checkedIn?'green':'orange'}">${a.checkedIn?'In':'Out'}</span>
-        </div>
-    `).join('');
-}
-
-function toast(m){ alert(m); }
 </script>
 </body>
 </html>
