@@ -1,0 +1,7 @@
+[build]
+  publish = "somaliland-event-qr"
+
+[[redirects]]
+  from = "/"
+  to = "/generate.html"
+  status = 302
