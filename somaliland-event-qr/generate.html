@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event QR — Generate</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #222222;
+    --gold: #c9a84c;
+    --gold-dim: #8a6f2e;
+    --text: #e8e0d0;
+    --muted: #555;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .flag-bar {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .flag-seg {
+    height: 4px;
+    width: 40px;
+    border-radius: 2px;
+  }
+
+  .label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    color: var(--gold);
+    line-height: 1.1;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 40px;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .field {
+    margin-bottom: 24px;
+  }
+
+  .field-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  input, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 12px 14px;
+    border-radius: 1px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--gold-dim);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  button {
+    width: 100%;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 16px;
+    cursor: pointer;
+    border-radius: 1px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+    margin-top: 8px;
+  }
+
+  button:hover { opacity: 0.85; }
+
+  .qr-output {
+    display: none;
+    margin-top: 40px;
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .qr-output.show { display: block; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  .qr-wrap {
+    display: inline-block;
+    background: #fff;
+    padding: 20px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  .qr-meta {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 2;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  .qr-meta span {
+    color: var(--text);
+  }
+
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    margin-top: 0;
+  }
+
+  .nav-hint {
+    margin-top: 32px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-align: center;
+  }
+
+  .nav-hint a {
+    color: var(--gold-dim);
+    text-decoration: none;
+  }
+
+  .nav-hint a:hover { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="flag-bar">
+    <div class="flag-seg" style="background:#4a90d9;"></div>
+    <div class="flag-seg" style="background:#ffffff;"></div>
+    <div class="flag-seg" style="background:#4a90d9;"></div>
+  </div>
+  <div class="label">Somaliland Event System</div>
+  <h1>Generate Event QR</h1>
+</div>
+
+<div class="card">
+  <div class="field">
+    <label class="field-label">Event Name</label>
+    <input type="text" id="eventName" placeholder="Hargeisa Cultural Festival 2025" />
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label class="field-label">Date</label>
+      <input type="date" id="eventDate" />
+    </div>
+    <div class="field">
+      <label class="field-label">Time</label>
+      <input type="time" id="eventTime" />
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">Venue</label>
+    <input type="text" id="eventVenue" placeholder="Hargeisa Cultural Centre" />
+  </div>
+
+  <div class="field">
+    <label class="field-label">Organizer</label>
+    <input type="text" id="eventOrg" placeholder="Ministry of Culture" />
+  </div>
+
+  <div class="field">
+    <label class="field-label">Secret Key (used for validation)</label>
+    <input type="password" id="secretKey" placeholder="Set a secure key for admin scanning" />
+  </div>
+
+  <button onclick="generateQR()">Generate QR Code</button>
+</div>
+
+<div class="qr-output" id="qrOutput">
+  <div class="card">
+    <div class="label" style="text-align:center; margin-bottom:16px;">Event QR Code</div>
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+    </div>
+    <div class="qr-meta" id="qrMeta"></div>
+    <div class="btn-row">
+      <button class="btn-outline" onclick="printQR()">Print / Save</button>
+      <button onclick="copyToken()">Copy Token</button>
+    </div>
+  </div>
+</div>
+
+<div class="nav-hint">
+  Admin scanner → <a href="admin/scan.html">admin/scan.html</a>
+</div>
+
+<script>
+let currentToken = '';
+
+function generateQR() {
+  const name = document.getElementById('eventName').value.trim();
+  const date = document.getElementById('eventDate').value;
+  const time = document.getElementById('eventTime').value;
+  const venue = document.getElementById('eventVenue').value.trim();
+  const org = document.getElementById('eventOrg').value.trim();
+  const secret = document.getElementById('secretKey').value.trim();
+
+  if (!name || !date || !venue || !secret) {
+    alert('Please fill in Event Name, Date, Venue, and Secret Key.');
+    return;
+  }
+
+  // Build a signed token payload
+  const payload = {
+    n: name,
+    d: date,
+    t: time,
+    v: venue,
+    o: org,
+    ts: Date.now()
+  };
+
+  const payloadStr = JSON.stringify(payload);
+  // Simple HMAC-like signature using the secret
+  const sig = simpleHash(payloadStr + '|' + secret);
+  const tokenObj = { payload: btoa(payloadStr), sig };
+  currentToken = JSON.stringify(tokenObj);
+
+  // Store secret key locally for scanning (admin would set in scan.html)
+  localStorage.setItem('eventToken', currentToken);
+  localStorage.setItem('eventSecret', secret);
+
+  // Clear old QR
+  document.getElementById('qrcode').innerHTML = '';
+
+  // Generate QR
+  new QRCode(document.getElementById('qrcode'), {
+    text: currentToken,
+    width: 240,
+    height: 240,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  // Meta info
+  const formatted = new Date(date).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('qrMeta').innerHTML = `
+    <div>event &nbsp;&nbsp;&nbsp; <span>${name}</span></div>
+    <div>date &nbsp;&nbsp;&nbsp;&nbsp; <span>${formatted}</span></div>
+    <div>time &nbsp;&nbsp;&nbsp;&nbsp; <span>${time || '—'}</span></div>
+    <div>venue &nbsp;&nbsp;&nbsp; <span>${venue}</span></div>
+    <div>organizer <span>${org || '—'}</span></div>
+  `;
+
+  const out = document.getElementById('qrOutput');
+  out.classList.add('show');
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + c;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+function printQR() {
+  window.print();
+}
+
+function copyToken() {
+  navigator.clipboard.writeText(currentToken).then(() => {
+    alert('Token copied to clipboard.');
+  });
+}
+</script>
+</body>
+</html>

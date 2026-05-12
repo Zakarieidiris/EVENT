@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart QR Entrance Scanner</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+
+<style>
+:root{
+  --bg:#0b0b0b;
+  --card:#121212;
+  --border:#242424;
+  --gold:#d0a94f;
+  --text:#f2ead8;
+  --muted:#7d7d7d;
+  --green:#3ddc84;
+  --greenbg:#0d2918;
+  --red:#ff5757;
+  --redbg:#2b1010;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial, sans-serif;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.app{
+  width:100%;
+  max-width:520px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:24px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:10px;
+  color:var(--gold);
+}
+
+.sub{
+  text-align:center;
+  color:var(--muted);
+  margin-bottom:24px;
+  font-size:14px;
+}
+
+label{
+  display:block;
+  margin-bottom:8px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+input,textarea{
+  width:100%;
+  background:#0d0d0d;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:14px;
+  border-radius:12px;
+  outline:none;
+  margin-bottom:18px;
+}
+
+textarea{
+  min-height:90px;
+  resize:none;
+}
+
+button{
+  width:100%;
+  border:none;
+  background:var(--gold);
+  color:#000;
+  padding:14px;
+  border-radius:12px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-bottom:14px;
+}
+
+video{
+  width:100%;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:#000;
+  margin-bottom:16px;
+}
+
+.result{
+  margin-top:20px;
+  border-radius:14px;
+  padding:18px;
+  display:none;
+}
+
+.result.valid{
+  display:block;
+  background:var(--greenbg);
+  border:1px solid var(--green);
+}
+
+.result.invalid{
+  display:block;
+  background:var(--redbg);
+  border:1px solid var(--red);
+}
+
+.status{
+  font-size:22px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.details{
+  line-height:1.9;
+  font-size:14px;
+}
+
+.small{
+  color:var(--muted);
+  text-align:center;
+  font-size:12px;
+  margin-top:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="card">
+
+    <h1>Entrance Scanner</h1>
+    <div class="sub">
+      Auto QR Detection + Manual Token Validation
+    </div>
+
+    <label>Secret Key</label>
+    <input type="password" id="secretKey" placeholder="Enter event secret key">
+
+    <button onclick="startCamera()">Start Camera Scanner</button>
+
+    <video id="video" autoplay playsinline muted></video>
+
+    <label>Or Paste Token Manually</label>
+    <textarea id="manualToken" placeholder="Paste token here..."></textarea>
+
+    <div class="small">
+      Token validates automatically while typing
+    </div>
+
+    <div class="result" id="resultBox">
+      <div class="status" id="status"></div>
+      <div class="details" id="details"></div>
+    </div>
+
+  </div>
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+let stream = null;
+let scanning = false;
+
+const manualToken = document.getElementById('manualToken');
+
+manualToken.addEventListener('input', () => {
+  const value = manualToken.value.trim();
+
+  if(value.length > 20){
+    validateToken(value);
+  }
+});
+
+async function startCamera(){
+
+  const key = getKey();
+
+  if(!key){
+    alert("Please enter the secret key.");
+    return;
+  }
+
+  try{
+
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{
+        facingMode:{ ideal:"environment" }
+      }
+    });
+
+    const video = document.getElementById('video');
+    video.srcObject = stream;
+
+    scanning = true;
+
+    requestAnimationFrame(scanFrame);
+
+  }catch(err){
+    alert("Camera access failed.");
+  }
+}
+
+function scanFrame(){
+
+  if(!scanning) return;
+
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.drawImage(video,0,0,canvas.width,canvas.height);
+
+    const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+
+    const code = jsQR(
+      imageData.data,
+      imageData.width,
+      imageData.height
+    );
+
+    if(code){
+      scanning = false;
+      stopCamera();
+      validateToken(code.data);
+      return;
+    }
+  }
+
+  requestAnimationFrame(scanFrame);
+}
+
+function stopCamera(){
+
+  if(stream){
+    stream.getTracks().forEach(track => track.stop());
+  }
+}
+
+function getKey(){
+  return document.getElementById('secretKey').value.trim();
+}
+
+function validateToken(raw){
+
+  const secret = getKey();
+
+  if(!secret){
+    return;
+  }
+
+  try{
+
+    const tokenObj = JSON.parse(raw);
+
+    if(!tokenObj.payload || !tokenObj.sig){
+      throw new Error();
+    }
+
+    const payloadString = atob(tokenObj.payload);
+
+    const expectedSig = simpleHash(
+      payloadString + "|" + secret
+    );
+
+    if(expectedSig !== tokenObj.sig){
+
+      showInvalid("Wrong key or fake QR code");
+      return;
+    }
+
+    const payload = JSON.parse(payloadString);
+
+    showValid(payload);
+
+  }catch(err){
+
+    showInvalid("Invalid token");
+  }
+}
+
+function showValid(payload){
+
+  const box = document.getElementById('resultBox');
+
+  box.className = "result valid";
+
+  document.getElementById('status').innerHTML =
+    "✅ VALID ENTRY";
+
+  document.getElementById('details').innerHTML = `
+    <div><b>Event:</b> ${payload.n}</div>
+    <div><b>Date:</b> ${payload.d}</div>
+    <div><b>Time:</b> ${payload.t || "—"}</div>
+    <div><b>Venue:</b> ${payload.v}</div>
+    <div><b>Organizer:</b> ${payload.o || "—"}</div>
+  `;
+}
+
+function showInvalid(message){
+
+  const box = document.getElementById('resultBox');
+
+  box.className = "result invalid";
+
+  document.getElementById('status').innerHTML =
+    "❌ INVALID";
+
+  document.getElementById('details').innerHTML =
+    `<div>${message}</div>`;
+}
+
+function simpleHash(str){
+
+  let hash = 0;
+
+  for(let i=0;i<str.length;i++){
+
+    const chr = str.charCodeAt(i);
+
+    hash = ((hash << 5) - hash) + chr;
+
+    hash |= 0;
+  }
+
+  return Math.abs(hash).toString(36);
+}
+</script>
+
+</body>
+</html>
