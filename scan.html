@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Smart QR Entrance Scanner</title>
+<title>Auto QR Scanner</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 
 <style>
@@ -29,7 +29,7 @@
 body{
   background:var(--bg);
   color:var(--text);
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   min-height:100vh;
   display:flex;
   justify-content:center;
@@ -69,7 +69,7 @@ label{
   color:var(--muted);
 }
 
-input,textarea{
+input{
   width:100%;
   background:#0d0d0d;
   border:1px solid var(--border);
@@ -78,11 +78,6 @@ input,textarea{
   border-radius:12px;
   outline:none;
   margin-bottom:18px;
-}
-
-textarea{
-  min-height:90px;
-  resize:none;
 }
 
 button{
@@ -134,13 +129,6 @@ video{
   line-height:1.9;
   font-size:14px;
 }
-
-.small{
-  color:var(--muted);
-  text-align:center;
-  font-size:12px;
-  margin-top:12px;
-}
 </style>
 </head>
 
@@ -150,23 +138,20 @@ video{
   <div class="card">
 
     <h1>Entrance Scanner</h1>
+
     <div class="sub">
-      Auto QR Detection + Manual Token Validation
+      Automatic QR Detection & Validation
     </div>
 
     <label>Secret Key</label>
-    <input type="password" id="secretKey" placeholder="Enter event secret key">
 
-    <button onclick="startCamera()">Start Camera Scanner</button>
+    <input type="password" id="secretKey" placeholder="Enter secret key">
+
+    <button onclick="startCamera()">
+      Start Camera Scanner
+    </button>
 
     <video id="video" autoplay playsinline muted></video>
-
-    <label>Or Paste Token Manually</label>
-    <textarea id="manualToken" placeholder="Paste token here..."></textarea>
-
-    <div class="small">
-      Token validates automatically while typing
-    </div>
 
     <div class="result" id="resultBox">
       <div class="status" id="status"></div>
@@ -179,25 +164,16 @@ video{
 <canvas id="canvas" style="display:none;"></canvas>
 
 <script>
+
 let stream = null;
 let scanning = false;
 
-const manualToken = document.getElementById('manualToken');
-
-manualToken.addEventListener('input', () => {
-  const value = manualToken.value.trim();
-
-  if(value.length > 20){
-    validateToken(value);
-  }
-});
-
 async function startCamera(){
 
-  const key = getKey();
+  const secret = getKey();
 
-  if(!key){
-    alert("Please enter the secret key.");
+  if(!secret){
+    alert("Please enter secret key");
     return;
   }
 
@@ -210,6 +186,7 @@ async function startCamera(){
     });
 
     const video = document.getElementById('video');
+
     video.srcObject = stream;
 
     scanning = true;
@@ -217,7 +194,8 @@ async function startCamera(){
     requestAnimationFrame(scanFrame);
 
   }catch(err){
-    alert("Camera access failed.");
+
+    alert("Camera access failed");
   }
 }
 
@@ -236,7 +214,12 @@ function scanFrame(){
 
     ctx.drawImage(video,0,0,canvas.width,canvas.height);
 
-    const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    const imageData = ctx.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
     const code = jsQR(
       imageData.data,
@@ -244,22 +227,22 @@ function scanFrame(){
       imageData.height
     );
 
-    if(code){
-      scanning = false;
-      stopCamera();
+    if(code && code.data){
+
       validateToken(code.data);
+
+      scanning = false;
+
+      setTimeout(() => {
+        scanning = true;
+        requestAnimationFrame(scanFrame);
+      }, 2500);
+
       return;
     }
   }
 
   requestAnimationFrame(scanFrame);
-}
-
-function stopCamera(){
-
-  if(stream){
-    stream.getTracks().forEach(track => track.stop());
-  }
 }
 
 function getKey(){
@@ -269,10 +252,6 @@ function getKey(){
 function validateToken(raw){
 
   const secret = getKey();
-
-  if(!secret){
-    return;
-  }
 
   try{
 
@@ -300,7 +279,7 @@ function validateToken(raw){
 
   }catch(err){
 
-    showInvalid("Invalid token");
+    showInvalid("Invalid QR code");
   }
 }
 
@@ -318,7 +297,6 @@ function showValid(payload){
     <div><b>Date:</b> ${payload.d}</div>
     <div><b>Time:</b> ${payload.t || "—"}</div>
     <div><b>Venue:</b> ${payload.v}</div>
-    <div><b>Organizer:</b> ${payload.o || "—"}</div>
   `;
 }
 
@@ -350,6 +328,7 @@ function simpleHash(str){
 
   return Math.abs(hash).toString(36);
 }
+
 </script>
 
 </body>
