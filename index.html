@@ -35,16 +35,22 @@ input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;
 
 #reader { width: 100% !important; border-radius: 12px; overflow: hidden; background: #000; }
 
+/* Counter Styling */
+.scan-counter-badge {
+    background: var(--gold);
+    color: var(--ink);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 14px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
 /* Result Message Styles */
 .scan-result { padding: 1.5rem; border-radius: 12px; margin-top: 15px; display: none; text-align: center; border: 2px solid transparent; }
-
-/* Normal Guest - Green */
 .res-normal { background: var(--green-bg); border-color: var(--green); color: var(--green); }
-
-/* VIP - Gold */
 .res-vip { background: var(--gold-bg); border-color: var(--gold); color: var(--ink2); }
-
-/* VIP Dinner - Darker Golden with Dots */
 .res-dinner { background: #F5D78E; border-color: #C9921A; color: #3D2B0A; box-shadow: 0 4px 15px rgba(201, 146, 26, 0.2); }
 .dot-sep::before { content: " • "; font-weight: 800; }
 </style>
@@ -86,6 +92,11 @@ input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;
     </div>
 
     <div class="panel" id="panel-scanner">
+        <div style="text-align: center;">
+            <div class="scan-counter-badge">
+                Total Scanned: <span id="scan-count-display">0</span>
+            </div>
+        </div>
         <div class="card" style="padding:10px; background:#000">
             <div id="reader"></div>
         </div>
@@ -100,14 +111,23 @@ input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;
 
 <script>
 let html5QrCode = null;
+// Initialize scan counter from localStorage
+let totalScans = parseInt(localStorage.getItem('sl_total_scans') || '0');
+
+function updateScanDisplay() {
+    document.getElementById('scan-count-display').textContent = totalScans;
+}
 
 function switchTab(id) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    if(event) event.currentTarget.classList.add('active');
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + id).classList.add('active');
     
-    if(id === 'scanner') startScanner();
+    if(id === 'scanner') {
+        updateScanDisplay();
+        startScanner();
+    }
     else if(html5QrCode) html5QrCode.stop();
 }
 
@@ -132,6 +152,12 @@ function startScanner() {
         try {
             const data = JSON.parse(decodedText);
             showResult(data);
+            
+            // Increment Scan Counter
+            totalScans++;
+            localStorage.setItem('sl_total_scans', totalScans);
+            updateScanDisplay();
+
             new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
         } catch(e) { alert("Invalid Ticket"); }
     });
@@ -143,8 +169,8 @@ function showResult(data) {
     const icon = document.getElementById('res-icon');
     
     res.style.display = 'block';
-    res.className = 'scan-result'; // Reset
-    typeEl.className = ''; // Reset
+    res.className = 'scan-result'; 
+    typeEl.className = ''; 
     
     document.getElementById('res-name').textContent = data.n;
     
@@ -162,6 +188,9 @@ function showResult(data) {
         icon.className = 'ti ti-user-check';
     }
 }
+
+// Initial display update
+updateScanDisplay();
 </script>
 </body>
 </html>
