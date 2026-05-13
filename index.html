@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dhacdooyinka — QR System with Timing</title>
+<title>Dhacdooyinka — Event System</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
@@ -16,132 +16,160 @@
 }
 body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh}
 
-.header{background:var(--ink);padding:1rem 1.5rem;display:flex;align-items:center;gap:12px}
+/* Auth Overlay */
+#auth-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--ink); display: flex; align-items: center; justify-content: center;
+    z-index: 10000; flex-direction: column; color: white;
+}
+.auth-card { background: var(--ink2); padding: 2.5rem; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--gold); }
+
+.header{background:var(--ink);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
 .header-logo{width:40px;height:40px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink);font-weight:800}
 .header-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:white}
 
-.tabs{display:flex;background:var(--ink2);padding:0 1rem;border-bottom:2px solid var(--gold)}
-.tab{padding:1rem;font-family:'Syne',sans-serif;font-weight:600;font-size:13px;color:#8A7A5A;cursor:pointer;display:flex;align-items:center;gap:6px}
-.tab.active{color:var(--gold);border-bottom:3px solid var(--gold)}
+.tabs{display:flex;background:var(--ink2);padding:0 1rem; border-bottom: 2px solid var(--gold)}
+.tab{padding:1rem; font-family:'Syne',sans-serif;font-weight:600;font-size:13px;color:#8A7A5A;cursor:pointer; display: flex; align-items:center; gap:6px}
+.tab.active{color:var(--gold); border-bottom: 3px solid var(--gold)}
+.admin-only { display: none; }
 
 .content{padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
 .panel{display:none}
 .panel.active{display:block}
 
 .card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center}
-input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin:10px 0 20px;font-family:inherit}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%;transition:0.2s}
+input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin:10px 0 20px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%}
 .btn-gold{background:var(--gold);color:var(--ink)}
+.btn-outline{background:transparent; border: 1px solid var(--gold); color: var(--gold); margin-top: 10px;}
 
+/* Scanner Styles */
 #reader { width: 100% !important; border-radius: 12px; overflow: hidden; background: #000; }
-
-.scan-meta { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
-.scan-badge { background: var(--ink2); color: var(--gold-light); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid var(--gold); }
+.scan-meta { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+.scan-badge { background: var(--ink2); color: var(--gold-light); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid var(--gold); }
 
 .scan-result { padding: 1.5rem; border-radius: 12px; margin-top: 15px; display: none; text-align: center; border: 2px solid transparent; }
 .res-normal { background: var(--green-bg); border-color: var(--green); color: var(--green); }
 .res-vip { background: var(--gold-bg); border-color: var(--gold); color: var(--ink2); }
 .res-dinner { background: #F5D78E; border-color: #C9921A; color: #3D2B0A; }
+.res-dupe { background: #FFF3CD; border-color: #F39C12; color: #8A5C00; }
 .dot-sep::before { content: " • "; font-weight: 800; }
-
-/* History List */
-.history-list { margin-top: 20px; text-align: left; }
-.history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
-.history-time { color: var(--muted); font-family: monospace; }
 </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="header-logo">QR</div>
-    <div class="header-title">SOMALILAND NIGHT</div>
+<div id="auth-screen">
+    <div class="auth-card">
+        <h2 style="font-family:Syne; margin-bottom: 20px;">Dhacdooyinka</h2>
+        <input type="password" id="admin-pass" placeholder="Admin Password" style="text-align: center;">
+        <button class="btn btn-gold" onclick="checkAuth()">Login as Admin</button>
+        <button class="btn btn-outline" onclick="bypassToRegister()">Registration Only</button>
+    </div>
 </div>
 
-<div class="tabs">
-    <div class="tab active" onclick="switchTab('generate')"><i class="ti ti-qrcode"></i> 1. Create</div>
-    <div class="tab" onclick="switchTab('scanner')"><i class="ti ti-scan"></i> 2. Scan</div>
-</div>
+<div class="app">
+  <div class="header">
+    <div style="display:flex; align-items:center; gap:12px">
+        <div class="header-logo">QR</div>
+        <div class="header-title">SOMALILAND NIGTH <span id="role-tag" style="font-size: 10px; color: var(--gold); border: 1px solid var(--gold); padding: 2px 6px; border-radius: 4px; margin-left: 5px;">USER</span></div>
+    </div>
+    <button class="btn btn-outline" style="width: auto; padding: 4px 10px; margin-top:0" onclick="location.reload()">Logout</button>
+  </div>
 
-<div class="content">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('generate')"><i class="ti ti-qrcode"></i> Create</div>
+    <div class="tab admin-only" onclick="switchTab('scanner')"><i class="ti ti-scan"></i> Scanner</div>
+  </div>
+
+  <div class="content">
     <div class="panel active" id="panel-generate">
-        <div class="card">
-            <h3>Create Ticket</h3>
-            <input type="text" id="f-name" placeholder="Attendee Name">
-            <select id="f-type">
-                <option value="Normal Guest">Normal Guest</option>
-                <option value="VIP">VIP</option>
-                <option value="VIP WITH DINNER">VIP WITH DINNER</option>
-            </select>
-            <button class="btn btn-gold" onclick="generateQR()">Generate Ticket</button>
-        </div>
-        <div class="card" id="qr-output" style="display:none">
-            <div id="qr-canvas" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
-            <h2 id="t-name"></h2>
-            <p id="t-type"></p>
-        </div>
+      <div class="card">
+        <h3 style="font-family:Syne">New Ticket</h3>
+        <input type="text" id="f-name" placeholder="Attendee Full Name">
+        <select id="f-type">
+          <option value="Normal Guest">Normal Guest</option>
+          <option value="VIP">VIP</option>
+          <option value="VIP WITH DINNER">VIP WITH DINNER</option>
+        </select>
+        <button class="btn btn-gold" onclick="generateQR()">Generate Ticket</button>
+      </div>
+
+      <div class="card" id="qr-output" style="display:none">
+        <div id="qr-canvas" style="display:flex; justify-content:center; margin-bottom: 1rem;"></div>
+        <h2 id="t-name"></h2>
+        <p id="t-type" style="font-weight:bold"></p>
+        <button class="btn btn-outline" onclick="window.print()">Print Ticket</button>
+      </div>
     </div>
 
     <div class="panel" id="panel-scanner">
-        <div class="scan-meta">
-            <div class="scan-badge">Scans: <span id="scan-count">0</span></div>
-            <div class="scan-badge">Last: <span id="last-time">--:--</span></div>
-        </div>
-        
-        <div class="card" style="padding:10px; background:#000"><div id="reader"></div></div>
-        
-        <div id="scan-result" class="scan-result">
-            <i id="res-icon" class="ti" style="font-size:40px"></i>
-            <h2 id="res-name"></h2>
-            <p id="res-type"></p>
-            <p id="res-time" style="font-size:11px; margin-top:10px; opacity:0.7"></p>
-        </div>
-
-        <div class="card history-list">
-            <h4 style="margin-bottom:10px; font-family:Syne">Recent History</h4>
-            <div id="history-items"></div>
-        </div>
+      <div class="scan-meta">
+          <div class="scan-badge">Total Scanned: <span id="scan-count">0</span></div>
+          <div class="scan-badge">Last: <span id="last-time">--:--</span></div>
+      </div>
+      
+      <div class="card" style="padding:10px; background:#000"><div id="reader"></div></div>
+      
+      <div id="scan-result" class="scan-result">
+          <i id="res-icon" class="ti" style="font-size:40px"></i>
+          <h2 id="res-name"></h2>
+          <p id="res-type"></p>
+          <p id="res-time" style="font-size:11px; margin-top:10px; opacity:0.8"></p>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
+const ADMIN_PASSWORD = "1234"; 
 let html5QrCode = null;
-let totalScans = parseInt(localStorage.getItem('sl_scans') || '0');
-let history = JSON.parse(localStorage.getItem('sl_history') || '[]');
+let isAdmin = false;
 
-function updateUI() {
-    document.getElementById('scan-count').textContent = totalScans;
-    const last = history[0];
-    if(last) document.getElementById('last-time').textContent = last.time;
-    
-    const container = document.getElementById('history-items');
-    container.innerHTML = history.slice(0, 5).map(h => `
-        <div class="history-item">
-            <span><strong>${h.name}</strong> (${h.type})</span>
-            <span class="history-time">${h.time}</span>
-        </div>
-    `).join('');
+// Track unique scans
+let scannedIds = JSON.parse(localStorage.getItem('sl_scanned_ids') || '[]');
+
+function checkAuth() {
+    if(document.getElementById('admin-pass').value === ADMIN_PASSWORD) {
+        isAdmin = true;
+        document.getElementById('auth-screen').style.display = 'none';
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+        document.getElementById('role-tag').textContent = "ADMIN";
+    } else { alert("Incorrect Password"); }
 }
 
-function switchTab(id) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    if(event) event.currentTarget.classList.add('active');
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + id).classList.add('active');
-    if(id === 'scanner') { updateUI(); startScanner(); }
-    else if(html5QrCode) html5QrCode.stop();
+function bypassToRegister() {
+    document.getElementById('auth-screen').style.display = 'none';
 }
 
-function generateQR() {
-    const name = document.getElementById('f-name').value.trim();
-    const type = document.getElementById('f-type').value;
-    if(!name) return alert("Enter name");
-    const qrData = JSON.stringify({ n: name, t: type });
-    document.getElementById('qr-output').style.display = 'block';
-    document.getElementById('t-name').textContent = name;
-    document.getElementById('t-type').textContent = type;
-    const canvas = document.getElementById('qr-canvas');
-    canvas.innerHTML = "";
-    new QRCode(canvas, { text: qrData, width: 200, height: 200 });
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  
+  if(id === 'scanner') {
+      updateStats();
+      startScanner();
+  } else if(html5QrCode) {
+      html5QrCode.stop();
+  }
+}
+
+function generateQR(){
+  const name = document.getElementById('f-name').value.trim();
+  const type = document.getElementById('f-type').value;
+  if(!name) return alert("Enter Name");
+
+  // QR contains Name + Type as a unique string
+  const qrData = JSON.stringify({ n: name, t: type });
+
+  document.getElementById('qr-output').style.display = 'block';
+  document.getElementById('t-name').textContent = name;
+  document.getElementById('t-type').textContent = type;
+  
+  const canvas = document.getElementById('qr-canvas');
+  canvas.innerHTML = "";
+  new QRCode(canvas, { text: qrData, width: 200, height: 200 });
 }
 
 function startScanner() {
@@ -149,29 +177,45 @@ function startScanner() {
     html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
         try {
             const data = JSON.parse(decodedText);
+            const ticketId = data.n + data.t; // Unique identifier
             const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            
-            // Save to history
-            totalScans++;
-            history.unshift({ name: data.n, type: data.t, time: now });
-            localStorage.setItem('sl_scans', totalScans);
-            localStorage.setItem('sl_history', JSON.stringify(history));
-            
-            showResult(data, now);
-            updateUI();
-            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
-        } catch(e) { console.error(e); }
+
+            if (scannedIds.includes(ticketId)) {
+                showResult(data, now, "DUPE");
+            } else {
+                scannedIds.push(ticketId);
+                localStorage.setItem('sl_scanned_ids', JSON.stringify(scannedIds));
+                showResult(data, now, "SUCCESS");
+                updateStats(now);
+                new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
+            }
+        } catch(e) { alert("Invalid QR Format"); }
     });
 }
 
-function showResult(data, time) {
+function updateStats(time) {
+    document.getElementById('scan-count').textContent = scannedIds.length;
+    if(time) document.getElementById('last-time').textContent = time;
+}
+
+function showResult(data, time, status) {
     const res = document.getElementById('scan-result');
     const typeEl = document.getElementById('res-type');
     const icon = document.getElementById('res-icon');
     res.style.display = 'block';
-    res.className = 'scan-result'; 
+    res.className = 'scan-result';
+    
+    if(status === "DUPE") {
+        res.classList.add('res-dupe');
+        document.getElementById('res-name').textContent = "ALREADY SCANNED";
+        typeEl.textContent = data.n + " (REJECTED)";
+        icon.className = 'ti ti-alert-triangle';
+        document.getElementById('res-time').textContent = "This ticket was already used.";
+        return;
+    }
+
     document.getElementById('res-name').textContent = data.n;
-    document.getElementById('res-time').textContent = "Scanned at: " + time;
+    document.getElementById('res-time').textContent = "Verified at: " + time;
     
     if (data.t === "VIP WITH DINNER") {
         res.classList.add('res-dinner');
@@ -187,7 +231,6 @@ function showResult(data, time) {
         icon.className = 'ti ti-user-check';
     }
 }
-updateUI();
 </script>
 </body>
 </html>
