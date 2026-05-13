@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dhacdooyinka — Secure QR System</title>
+<title>Dhacdooyinka — QR System</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --gold:#C9921A; --gold-light:#F5D78E; --ink:#1A1209; --ink2:#3D2B0A; --muted:#7A6540;
-  --surface:#FFFDF7; --border:#D4B97A; --green:#1A7A3D; --green-bg:#D4F0DF; --gold-bg:#FDF6E3; --red:#C0392B;
+  --gold:#C9921A; --ink:#1A1209; --ink2:#3D2B0A; --surface:#FFFDF7;
+  --green-bg:#1A7A3D; --gold-bg:#C9921A; --dinner-bg:#F5D78E;
 }
-body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);overflow-x:hidden}
 
+/* Auth overlay */
 #auth-screen {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: var(--ink); display: flex; align-items: center; justify-content: center;
@@ -23,36 +24,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink)
 }
 .auth-card { background: var(--ink2); padding: 2.5rem; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--gold); }
 
-.header{background:var(--ink);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
-.header-logo{width:40px;height:40px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink);font-weight:800}
-.header-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:white}
-
-.tabs{display:flex;background:var(--ink2);padding:0 1rem; border-bottom: 2px solid var(--gold)}
-.tab{padding:1rem; font-family:'Syne',sans-serif;font-weight:600;font-size:13px;color:#8A7A5A;cursor:pointer; display: flex; align-items:center; gap:6px}
+.header{background:var(--ink);padding:1rem;display:flex;align-items:center;justify-content:space-between;color:white}
+.tabs{display:flex;background:var(--ink2);border-bottom: 2px solid var(--gold)}
+.tab{flex:1;padding:1rem;text-align:center;font-family:'Syne';font-weight:700;color:#8A7A5A;cursor:pointer}
 .tab.active{color:var(--gold); border-bottom: 3px solid var(--gold)}
 .admin-only { display: none; }
 
-.content{padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
+.content{padding:1.2rem;max-width:500px;margin:0 auto}
 .panel{display:none}
 .panel.active{display:block}
 
-.card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center}
+.card{background:white;border:1.5px solid var(--gold);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center}
 input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin:10px 0 20px;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%}
-.btn-gold{background:var(--gold);color:var(--ink)}
-.btn-outline{background:transparent; border: 1px solid var(--gold); color: var(--gold); margin-top: 10px;}
+.btn{padding:0.8rem;border-radius:8px;font-family:'Syne';font-weight:700;cursor:pointer;border:none;width:100%}
+.btn-gold{background:var(--gold);color:white}
 
+/* Scanner */
 #reader { width: 100% !important; border-radius: 12px; overflow: hidden; background: #000; }
-.scan-meta { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-.scan-badge { background: var(--ink2); color: var(--gold-light); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid var(--gold); }
+.scan-meta { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 14px;}
 
-.scan-result { padding: 1.5rem; border-radius: 12px; margin-top: 15px; display: none; text-align: center; border: 2px solid transparent; }
-.res-normal { background: var(--green-bg); border-color: var(--green); color: var(--green); }
-.res-vip { background: var(--gold-bg); border-color: var(--gold); color: var(--ink2); }
-.res-dinner { background: #F5D78E; border-color: #C9921A; color: #3D2B0A; }
-.res-dupe { background: #FFF3CD; border-color: #F39C12; color: #8A5C00; }
-.res-invalid { background: #FADBD8; border-color: var(--red); color: var(--red); }
-.dot-sep::before { content: " • "; font-weight: 800; }
+/* BIG RESULT MESSAGE */
+.scan-result { 
+    padding: 3rem 1rem; border-radius: 12px; margin-top: 15px; display: none; text-align: center; 
+    animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes zoomIn { from {transform: scale(0.5); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+
+.res-text { font-family: 'Syne'; font-size: 2.5rem; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.res-sub { font-size: 1.2rem; margin-top: 10px; font-weight: 500; }
+
+/* Colors */
+.res-normal { background: var(--green-bg); color: white; }
+.res-vip { background: var(--gold-bg); color: white; }
+.res-dinner { background: var(--dinner-bg); color: #3D2B0A; border: 4px solid var(--gold); }
+.res-invalid { background: #C0392B; color: white; }
+.dot-sep::before { content: " • "; }
 </style>
 </head>
 <body>
@@ -60,181 +66,132 @@ input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;
 <div id="auth-screen">
     <div class="auth-card">
         <h2 style="font-family:Syne; margin-bottom: 20px;">Dhacdooyinka</h2>
-        <input type="password" id="admin-pass" placeholder="Admin Password" style="text-align: center;">
-        <button class="btn btn-gold" onclick="checkAuth()">Login as Admin</button>
-        <button class="btn btn-outline" onclick="bypassToRegister()">Registration Only</button>
+        <input type="password" id="admin-pass" placeholder="Password" style="text-align: center;">
+        <button class="btn btn-gold" onclick="checkAuth()">Login Admin</button>
+        <button class="btn btn-gold" style="background:transparent; border:1px solid var(--gold); margin-top:10px" onclick="bypass()">Register Only</button>
     </div>
 </div>
 
-<div class="app">
-  <div class="header">
-    <div style="display:flex; align-items:center; gap:12px">
-        <div class="header-logo">QR</div>
-        <div class="header-title">SOMALILAND NIGHT</div>
-    </div>
-    <button class="btn btn-outline" style="width: auto; padding: 4px 10px; margin-top:0" onclick="location.reload()">Logout</button>
-  </div>
+<div class="header">
+    <div style="font-family:Syne; font-weight:800">DHACDOOYINKA</div>
+    <div id="scan-count-box" style="background:var(--gold); padding:2px 10px; border-radius:5px; font-size:12px; display:none">SCANS: <span id="scan-count">0</span></div>
+</div>
 
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('generate')"><i class="ti ti-qrcode"></i> Create</div>
-    <div class="tab admin-only" onclick="switchTab('scanner')"><i class="ti ti-scan"></i> Scanner</div>
-  </div>
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('generate')">CREATE</div>
+    <div class="tab admin-only" onclick="switchTab('scanner')">SCANNER</div>
+</div>
 
-  <div class="content">
+<div class="content">
     <div class="panel active" id="panel-generate">
-      <div class="card">
-        <h3 style="font-family:Syne">New Ticket</h3>
-        <input type="text" id="f-name" placeholder="Attendee Full Name">
-        <select id="f-type">
-          <option value="Normal Guest">Normal Guest</option>
-          <option value="VIP">VIP</option>
-          <option value="VIP WITH DINNER">VIP WITH DINNER</option>
-        </select>
-        <button class="btn btn-gold" onclick="generateQR()">Generate Ticket</button>
-      </div>
-
-      <div class="card" id="qr-output" style="display:none">
-        <div id="qr-canvas" style="display:flex; justify-content:center; margin-bottom: 1rem;"></div>
-        <h2 id="t-name"></h2>
-        <p id="t-type" style="font-weight:bold"></p>
-        <button class="btn btn-outline" onclick="window.print()">Print Ticket</button>
-      </div>
+        <div class="card">
+            <input type="text" id="f-name" placeholder="Full Name">
+            <select id="f-type">
+                <option value="NORMAL GUEST">NORMAL GUEST</option>
+                <option value="VIP">VIP</option>
+                <option value="VIP WITH DINNER">VIP WITH DINNER</option>
+            </select>
+            <button class="btn btn-gold" onclick="generateQR()">GENERATE</button>
+        </div>
+        <div class="card" id="qr-output" style="display:none">
+            <div id="qr-canvas" style="display:flex; justify-content:center; margin-bottom: 10px;"></div>
+            <h3 id="t-name"></h3>
+        </div>
     </div>
 
     <div class="panel" id="panel-scanner">
-      <div class="scan-meta">
-          <div class="scan-badge">Valid Scans: <span id="scan-count">0</span></div>
-          <div class="scan-badge">Last: <span id="last-time">--:--</span></div>
-      </div>
-      <div class="card" style="padding:10px; background:#000"><div id="reader"></div></div>
-      <div id="scan-result" class="scan-result">
-          <i id="res-icon" class="ti" style="font-size:40px"></i>
-          <h2 id="res-name"></h2>
-          <p id="res-type"></p>
-          <p id="res-time" style="font-size:11px; margin-top:10px; opacity:0.8"></p>
-      </div>
+        <div class="card" style="padding:5px; background:#000"><div id="reader"></div></div>
+        
+        <div id="scan-result" class="scan-result">
+            <div id="res-big-text" class="res-text"></div>
+            <div id="res-name-text" class="res-sub"></div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-const ADMIN_PASSWORD = "1234"; 
-const SYSTEM_KEY = "DH-2025"; // Secret key to verify tickets
+const PASS = "1234"; 
+const KEY = "DH25"; 
 let html5QrCode = null;
-let isAdmin = false;
-let scannedIds = JSON.parse(localStorage.getItem('sl_scanned_ids') || '[]');
+let scannedIds = JSON.parse(localStorage.getItem('scanned_list') || '[]');
 
 function checkAuth() {
-    if(document.getElementById('admin-pass').value === ADMIN_PASSWORD) {
-        isAdmin = true;
+    if(document.getElementById('admin-pass').value === PASS) {
         document.getElementById('auth-screen').style.display = 'none';
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
-    } else { alert("Incorrect Password"); }
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        document.getElementById('scan-count-box').style.display = 'block';
+    } else { alert("Wrong Password"); }
 }
-
-function bypassToRegister() { document.getElementById('auth-screen').style.display = 'none'; }
+function bypass() { document.getElementById('auth-screen').style.display = 'none'; }
 
 function switchTab(id){
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  if(event) event.currentTarget.classList.add('active');
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
-  if(id === 'scanner') { updateStats(); startScanner(); }
-  else if(html5QrCode) html5QrCode.stop();
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    if(id === 'scanner') { startScanner(); updateCount(); }
+    else if(html5QrCode) html5QrCode.stop();
 }
 
-function generateQR(){
-  const name = document.getElementById('f-name').value.trim();
-  const type = document.getElementById('f-type').value;
-  if(!name) return alert("Enter Name");
-
-  // Include the SECRET KEY in the data
-  const qrData = JSON.stringify({ n: name, t: type, key: SYSTEM_KEY });
-
-  document.getElementById('qr-output').style.display = 'block';
-  document.getElementById('t-name').textContent = name;
-  document.getElementById('t-type').textContent = type;
-  const canvas = document.getElementById('qr-canvas');
-  canvas.innerHTML = "";
-  new QRCode(canvas, { text: qrData, width: 200, height: 200 });
+function generateQR() {
+    const name = document.getElementById('f-name').value.trim();
+    const type = document.getElementById('f-type').value;
+    if(!name) return;
+    const data = JSON.stringify({n:name, t:type, k:KEY});
+    document.getElementById('qr-output').style.display = 'block';
+    document.getElementById('t-name').textContent = name;
+    const canvas = document.getElementById('qr-canvas');
+    canvas.innerHTML = "";
+    new QRCode(canvas, {text: data, width: 200, height: 200});
 }
 
 function startScanner() {
     html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
         try {
-            const data = JSON.parse(decodedText);
-            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            // 1. REJECT CODES FROM OTHER SYSTEMS
-            if (data.key !== SYSTEM_KEY) {
-                showResult({}, now, "INVALID");
-                return;
-            }
-
-            const ticketId = data.n + data.t; 
-
-            // 2. REJECT DUPLICATES
-            if (scannedIds.includes(ticketId)) {
-                showResult(data, now, "DUPE");
+            const data = JSON.parse(text);
+            if(data.k !== KEY) { showResult("INVALID", "WRONG SYSTEM"); return; }
+            
+            const id = data.n + data.t;
+            if(scannedIds.includes(id)) {
+                showResult("ALREADY IN", data.n);
             } else {
-                scannedIds.push(ticketId);
-                localStorage.setItem('sl_scanned_ids', JSON.stringify(scannedIds));
-                showResult(data, now, "SUCCESS");
-                updateStats(now);
+                scannedIds.push(id);
+                localStorage.setItem('scanned_list', JSON.stringify(scannedIds));
+                showResult(data.t, data.n);
+                updateCount();
                 new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
             }
-        } catch(e) { 
-            showResult({}, "", "INVALID"); // Rejects random non-JSON QRs
-        }
+        } catch(e) { showResult("INVALID", "NOT A TICKET"); }
     });
 }
 
-function updateStats(time) {
-    document.getElementById('scan-count').textContent = scannedIds.length;
-    if(time) document.getElementById('last-time').textContent = time;
-}
+function updateCount() { document.getElementById('scan-count').textContent = scannedIds.length; }
 
-function showResult(data, time, status) {
+function showResult(type, name) {
     const res = document.getElementById('scan-result');
-    const typeEl = document.getElementById('res-type');
-    const icon = document.getElementById('res-icon');
+    const big = document.getElementById('res-big-text');
+    const sub = document.getElementById('res-name-text');
     res.style.display = 'block';
     res.className = 'scan-result';
-    
-    if (status === "INVALID") {
-        res.classList.add('res-invalid');
-        document.getElementById('res-name').textContent = "INVALID QR CODE";
-        typeEl.textContent = "NOT RECOGNIZED BY SYSTEM";
-        icon.className = 'ti ti-barcode-off';
-        document.getElementById('res-time').textContent = "This code was not generated by Dhacdooyinka.";
-        return;
-    }
 
-    if(status === "DUPE") {
-        res.classList.add('res-dupe');
-        document.getElementById('res-name').textContent = "ALREADY SCANNED";
-        typeEl.textContent = data.n + " (DUPLICATE)";
-        icon.className = 'ti ti-alert-triangle';
-        document.getElementById('res-time').textContent = "This ticket was already used.";
-        return;
-    }
+    sub.textContent = name;
 
-    document.getElementById('res-name').textContent = data.n;
-    document.getElementById('res-time').textContent = "Verified at: " + time;
-    
-    if (data.t === "VIP WITH DINNER") {
+    if(type === "VIP WITH DINNER") {
         res.classList.add('res-dinner');
-        typeEl.innerHTML = `VIP <span class="dot-sep">DINNER INCLUDED</span>`;
-        icon.className = 'ti ti-Tools-kitchen-2';
-    } else if (data.t === "VIP") {
+        big.innerHTML = 'VIP <span class="dot-sep">DINNER</span>';
+    } else if(type === "VIP") {
         res.classList.add('res-vip');
-        typeEl.textContent = "VIP GUEST";
-        icon.className = 'ti ti-star';
-    } else {
+        big.textContent = 'VIP';
+    } else if(type === "NORMAL GUEST") {
         res.classList.add('res-normal');
-        typeEl.textContent = "NORMAL GUEST";
-        icon.className = 'ti ti-user-check';
+        big.textContent = 'NORMAL';
+    } else if(type === "ALREADY IN") {
+        res.style.background = "#85929E"; res.style.color = "white";
+        big.textContent = "USED CODE";
+    } else {
+        res.classList.add('res-invalid');
+        big.textContent = "INVALID";
     }
 }
 </script>
