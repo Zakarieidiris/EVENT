@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dhacdooyinka — QR System</title>
+<title>Dhacdooyinka — QR System with Timing</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
@@ -35,24 +35,19 @@ input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;
 
 #reader { width: 100% !important; border-radius: 12px; overflow: hidden; background: #000; }
 
-/* Counter Styling */
-.scan-counter-badge {
-    background: var(--gold);
-    color: var(--ink);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 800;
-    font-size: 14px;
-    display: inline-block;
-    margin-bottom: 10px;
-}
+.scan-meta { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.scan-badge { background: var(--ink2); color: var(--gold-light); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid var(--gold); }
 
-/* Result Message Styles */
 .scan-result { padding: 1.5rem; border-radius: 12px; margin-top: 15px; display: none; text-align: center; border: 2px solid transparent; }
 .res-normal { background: var(--green-bg); border-color: var(--green); color: var(--green); }
 .res-vip { background: var(--gold-bg); border-color: var(--gold); color: var(--ink2); }
-.res-dinner { background: #F5D78E; border-color: #C9921A; color: #3D2B0A; box-shadow: 0 4px 15px rgba(201, 146, 26, 0.2); }
+.res-dinner { background: #F5D78E; border-color: #C9921A; color: #3D2B0A; }
 .dot-sep::before { content: " • "; font-weight: 800; }
+
+/* History List */
+.history-list { margin-top: 20px; text-align: left; }
+.history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.history-time { color: var(--muted); font-family: monospace; }
 </style>
 </head>
 <body>
@@ -63,59 +58,68 @@ input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;
 </div>
 
 <div class="tabs">
-    <div class="tab active" onclick="switchTab('generate')"><i class="ti ti-qrcode"></i> 1. Create QR</div>
-    <div class="tab" onclick="switchTab('scanner')"><i class="ti ti-scan"></i> 2. Scan QR</div>
+    <div class="tab active" onclick="switchTab('generate')"><i class="ti ti-qrcode"></i> 1. Create</div>
+    <div class="tab" onclick="switchTab('scanner')"><i class="ti ti-scan"></i> 2. Scan</div>
 </div>
 
 <div class="content">
     <div class="panel active" id="panel-generate">
         <div class="card">
-            <h3 style="font-family:Syne;margin-bottom:15px">Create New Ticket</h3>
-            <label>Attendee Name</label>
-            <input type="text" id="f-name" placeholder="Enter Full Name">
-            
-            <label>Ticket Class</label>
+            <h3>Create Ticket</h3>
+            <input type="text" id="f-name" placeholder="Attendee Name">
             <select id="f-type">
                 <option value="Normal Guest">Normal Guest</option>
                 <option value="VIP">VIP</option>
                 <option value="VIP WITH DINNER">VIP WITH DINNER</option>
             </select>
-            
             <button class="btn btn-gold" onclick="generateQR()">Generate Ticket</button>
         </div>
-
         <div class="card" id="qr-output" style="display:none">
             <div id="qr-canvas" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
             <h2 id="t-name"></h2>
-            <p id="t-type" style="font-weight:700"></p>
+            <p id="t-type"></p>
         </div>
     </div>
 
     <div class="panel" id="panel-scanner">
-        <div style="text-align: center;">
-            <div class="scan-counter-badge">
-                Total Scanned: <span id="scan-count-display">0</span>
-            </div>
+        <div class="scan-meta">
+            <div class="scan-badge">Scans: <span id="scan-count">0</span></div>
+            <div class="scan-badge">Last: <span id="last-time">--:--</span></div>
         </div>
-        <div class="card" style="padding:10px; background:#000">
-            <div id="reader"></div>
-        </div>
+        
+        <div class="card" style="padding:10px; background:#000"><div id="reader"></div></div>
         
         <div id="scan-result" class="scan-result">
             <i id="res-icon" class="ti" style="font-size:40px"></i>
-            <h2 id="res-name" style="font-family:Syne;margin:10px 0 5px"></h2>
-            <p id="res-type" style="text-transform:uppercase;letter-spacing:1px;font-size:13px; font-weight:bold"></p>
+            <h2 id="res-name"></h2>
+            <p id="res-type"></p>
+            <p id="res-time" style="font-size:11px; margin-top:10px; opacity:0.7"></p>
+        </div>
+
+        <div class="card history-list">
+            <h4 style="margin-bottom:10px; font-family:Syne">Recent History</h4>
+            <div id="history-items"></div>
         </div>
     </div>
 </div>
 
 <script>
 let html5QrCode = null;
-// Initialize scan counter from localStorage
-let totalScans = parseInt(localStorage.getItem('sl_total_scans') || '0');
+let totalScans = parseInt(localStorage.getItem('sl_scans') || '0');
+let history = JSON.parse(localStorage.getItem('sl_history') || '[]');
 
-function updateScanDisplay() {
-    document.getElementById('scan-count-display').textContent = totalScans;
+function updateUI() {
+    document.getElementById('scan-count').textContent = totalScans;
+    const last = history[0];
+    if(last) document.getElementById('last-time').textContent = last.time;
+    
+    const container = document.getElementById('history-items');
+    container.innerHTML = history.slice(0, 5).map(h => `
+        <div class="history-item">
+            <span><strong>${h.name}</strong> (${h.type})</span>
+            <span class="history-time">${h.time}</span>
+        </div>
+    `).join('');
 }
 
 function switchTab(id) {
@@ -123,11 +127,7 @@ function switchTab(id) {
     if(event) event.currentTarget.classList.add('active');
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + id).classList.add('active');
-    
-    if(id === 'scanner') {
-        updateScanDisplay();
-        startScanner();
-    }
+    if(id === 'scanner') { updateUI(); startScanner(); }
     else if(html5QrCode) html5QrCode.stop();
 }
 
@@ -135,12 +135,10 @@ function generateQR() {
     const name = document.getElementById('f-name').value.trim();
     const type = document.getElementById('f-type').value;
     if(!name) return alert("Enter name");
-
     const qrData = JSON.stringify({ n: name, t: type });
     document.getElementById('qr-output').style.display = 'block';
     document.getElementById('t-name').textContent = name;
     document.getElementById('t-type').textContent = type;
-    
     const canvas = document.getElementById('qr-canvas');
     canvas.innerHTML = "";
     new QRCode(canvas, { text: qrData, width: 200, height: 200 });
@@ -151,28 +149,29 @@ function startScanner() {
     html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
         try {
             const data = JSON.parse(decodedText);
-            showResult(data);
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
-            // Increment Scan Counter
+            // Save to history
             totalScans++;
-            localStorage.setItem('sl_total_scans', totalScans);
-            updateScanDisplay();
-
+            history.unshift({ name: data.n, type: data.t, time: now });
+            localStorage.setItem('sl_scans', totalScans);
+            localStorage.setItem('sl_history', JSON.stringify(history));
+            
+            showResult(data, now);
+            updateUI();
             new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
-        } catch(e) { alert("Invalid Ticket"); }
+        } catch(e) { console.error(e); }
     });
 }
 
-function showResult(data) {
+function showResult(data, time) {
     const res = document.getElementById('scan-result');
     const typeEl = document.getElementById('res-type');
     const icon = document.getElementById('res-icon');
-    
     res.style.display = 'block';
     res.className = 'scan-result'; 
-    typeEl.className = ''; 
-    
     document.getElementById('res-name').textContent = data.n;
+    document.getElementById('res-time').textContent = "Scanned at: " + time;
     
     if (data.t === "VIP WITH DINNER") {
         res.classList.add('res-dinner');
@@ -188,9 +187,7 @@ function showResult(data) {
         icon.className = 'ti ti-user-check';
     }
 }
-
-// Initial display update
-updateScanDisplay();
+updateUI();
 </script>
 </body>
 </html>
