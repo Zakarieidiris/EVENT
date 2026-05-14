@@ -2,489 +2,716 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOMALILAND NIGHT — QR System</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SOMALILAND NIGHT</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --gold:#C9921A;--gold-light:#F5D78E;--ink:#1A1209;--ink2:#3D2B0A;--muted:#7A6540;
-  --surface:#FFFDF7;--border:#D4B97A;--green:#1A7A3D;--green-bg:#D4F0DF;--gold-bg:#FDF6E3;
+  --gold:#D4A843;--gold2:#F2CE7A;--gold-dim:#8A6A20;
+  --black:#080808;--surface:#0F0E0C;--card:#161410;--card2:#1C1A16;
+  --border:#2A2520;--border2:#3A3228;
+  --text:#F0EBE0;--text2:#A09070;--text3:#5A5040;
+  --green:#2A9B5A;--green-dim:#1A5A35;
 }
-body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Barlow',sans-serif;
+  background:var(--black);color:var(--text);
+  display:flex;flex-direction:column;
+  max-width:480px;margin:0 auto;position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.5;
+}
 
-.header{background:var(--ink);padding:1rem 1.5rem;display:flex;align-items:center;gap:12px}
-.header-logo{width:40px;height:40px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink);font-weight:800}
-.header-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:white}
+/* HEADER */
+.hdr{
+  position:relative;z-index:10;flex-shrink:0;
+  padding:16px 20px 13px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--black);
+}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-emblem{
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;
+  color:var(--gold);letter-spacing:.5px;
+  background:radial-gradient(circle at 40% 40%,#1e1a10,#080600);
+}
+.hdr-name{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:15px;letter-spacing:3px;text-transform:uppercase;color:var(--text);
+}
+.hdr-sub{font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-top:1px}
+.hdr-count{text-align:right}
+.hdr-count-num{
+  font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;
+  color:var(--gold);line-height:1;
+}
+.hdr-count-lbl{font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase}
 
-.tabs{display:flex;background:var(--ink2);padding:0 0.5rem;border-bottom:2px solid var(--gold)}
-.tab{padding:1rem 0.75rem;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;color:#8A7A5A;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
-.tab.active{color:var(--gold);border-bottom:3px solid var(--gold)}
+/* SCREEN */
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;z-index:1;-webkit-overflow-scrolling:touch}
+.panel{display:none;padding:20px 16px 100px;animation:fadeUp .3s ease both}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-.content{padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
-.panel{display:none}.panel.active{display:block}
+/* NAV */
+.nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:rgba(8,8,8,.97);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;z-index:100;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 4px 11px;gap:4px;cursor:pointer;border:none;background:none;
+  color:var(--text3);transition:color .2s;position:relative;
+}
+.nav-btn.active{color:var(--gold)}
+.nav-btn.active::before{
+  content:'';position:absolute;top:0;left:22%;right:22%;
+  height:2px;background:var(--gold);border-radius:0 0 2px 2px;
+}
+.nav-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600}
 
-.card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center}
-input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin:10px 0 20px;font-family:inherit}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%;transition:.2s}
-.btn-gold{background:var(--gold);color:var(--ink)}
+/* SECTION LABEL */
+.sec-label{
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  letter-spacing:3px;text-transform:uppercase;color:var(--text3);
+  margin-bottom:18px;display:flex;align-items:center;gap:10px;
+}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
 
-#reader{width:100%!important;border-radius:12px;overflow:hidden;background:#000}
+/* FORM */
+.form-group{margin-bottom:18px}
+.form-label{
+  display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;font-weight:600;
+}
+.form-input{
+  width:100%;padding:13px 16px;
+  background:var(--card);border:1px solid var(--border2);border-radius:10px;
+  font-family:'Barlow',sans-serif;font-size:15px;color:var(--text);
+  outline:none;transition:border-color .2s;-webkit-appearance:none;
+}
+.form-input::placeholder{color:var(--text3)}
+.form-input:focus{border-color:var(--gold-dim)}
 
-/* Cooldown overlay */
-.scanner-wrap{position:relative;border-radius:12px;overflow:hidden}
+/* TICKET TYPE */
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.type-pill{
+  padding:12px 4px 10px;border-radius:12px;border:1.5px solid var(--border2);
+  background:var(--card);cursor:pointer;text-align:center;transition:all .2s;
+}
+.type-pill.sel{border-color:var(--gold);background:rgba(212,168,67,.07)}
+.type-pill-icon{font-size:22px;margin-bottom:5px}
+.type-pill-name{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:var(--text3)}
+.type-pill.sel .type-pill-name{color:var(--gold2)}
+
+.btn-gen{
+  width:100%;padding:16px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#B8820F,#F2CE7A,#B8820F);background-size:200% 100%;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;
+  letter-spacing:3px;text-transform:uppercase;color:#0a0700;
+  transition:background-position .4s,transform .15s,box-shadow .2s;
+  box-shadow:0 4px 24px rgba(212,168,67,.2);
+}
+.btn-gen:active{transform:scale(.98)}
+
+/* QR CARD */
+.qr-card{
+  background:white;border-radius:16px;padding:24px 20px 20px;
+  text-align:center;margin-top:20px;position:relative;overflow:hidden;
+}
+.qr-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));
+}
+.qr-card-type{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.qr-card-type.vip{color:#8A6A20}
+.qr-card-type.normal{color:#2A7A50}
+#qr-canvas{display:flex;justify-content:center;margin-bottom:14px}
+.qr-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#1A1209}
+.qr-sub{font-size:10px;color:#8A7A5A;margin-top:5px;letter-spacing:1px;text-transform:uppercase}
+
+/* SCANNER */
+.scan-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-box{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px;text-align:center;
+}
+.stat-num{
+  font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;
+  color:var(--gold);line-height:1;margin-bottom:4px;
+}
+.stat-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:600}
+
+.scanner-wrap{
+  border-radius:16px;overflow:hidden;border:1px solid var(--border2);
+  background:#000;position:relative;margin-bottom:14px;
+}
+#reader{width:100%!important}
+
+.scan-corners{position:absolute;inset:0;pointer-events:none;z-index:5}
+.sc{position:absolute;width:28px;height:28px}
+.sc svg{width:100%;height:100%}
+.sc.tl{top:14px;left:14px}
+.sc.tr{top:14px;right:14px;transform:scaleX(-1)}
+.sc.bl{bottom:14px;left:14px;transform:scaleY(-1)}
+.sc.br{bottom:14px;right:14px;transform:scale(-1)}
+
+.scan-beam{
+  position:absolute;left:14px;right:14px;height:1.5px;
+  background:linear-gradient(90deg,transparent,var(--gold) 30%,var(--gold2) 50%,var(--gold) 70%,transparent);
+  box-shadow:0 0 10px var(--gold),0 0 20px rgba(212,168,67,.4);
+  animation:beam 2.8s ease-in-out infinite;z-index:6;
+}
+@keyframes beam{0%,100%{top:14px;opacity:.7}50%{top:calc(100% - 14px);opacity:1}}
+
 .cooldown-overlay{
-  position:absolute;inset:0;border-radius:12px;
-  background:rgba(0,0,0,.88);
+  position:absolute;inset:0;z-index:10;
+  background:rgba(0,0,0,.93);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-  z-index:10;opacity:0;pointer-events:none;transition:opacity .3s;
+  opacity:0;pointer-events:none;transition:opacity .3s;
 }
 .cooldown-overlay.on{opacity:1;pointer-events:all}
-.spin-ring{
-  width:58px;height:58px;border-radius:50%;
-  border:5px solid rgba(255,255,255,.18);
-  border-top-color:var(--gold);
+.c-ring{
+  width:60px;height:60px;border-radius:50%;
+  border:2px solid rgba(212,168,67,.15);border-top-color:var(--gold);
   animation:spin 1s linear infinite;
 }
-.cooldown-label{color:var(--gold-light);font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
 @keyframes spin{to{transform:rotate(360deg)}}
+.c-text{
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;
+  letter-spacing:3px;text-transform:uppercase;color:var(--gold2);font-weight:600;
+}
 
-.scan-badge{background:var(--gold);color:var(--ink);padding:4px 14px;border-radius:20px;font-weight:800;font-size:14px;display:inline-block;margin-bottom:10px}
-
-/* Modal */
+/* MODAL */
 .overlay{
-  position:fixed;inset:0;z-index:300;
-  background:rgba(26,18,9,.8);backdrop-filter:blur(5px);
-  display:flex;align-items:center;justify-content:center;
+  position:fixed;inset:0;z-index:500;
+  display:flex;align-items:flex-end;justify-content:center;
   opacity:0;pointer-events:none;transition:opacity .25s;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(10px);
 }
 .overlay.show{opacity:1;pointer-events:all}
 .modal{
-  background:var(--surface);border-radius:22px;border:2px solid var(--border);
-  padding:2rem 1.5rem 1.5rem;width:min(92vw,360px);text-align:center;
-  transform:translateY(28px) scale(.94);
-  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 24px 70px rgba(26,18,9,.35);
+  width:100%;max-width:480px;border-radius:24px 24px 0 0;
+  padding-bottom:calc(env(safe-area-inset-bottom) + 20px);
+  transform:translateY(100%);overflow:hidden;
+  transition:transform .38s cubic-bezier(.32,1.1,.64,1);
 }
-.overlay.show .modal{transform:translateY(0) scale(1)}
+.overlay.show .modal{transform:translateY(0)}
+.modal.nm{background:#0E0E0C;border:1px solid #282420;border-bottom:none}
+.modal.vp{background:#0C0900;border:1px solid #3A2A08;border-bottom:none}
 
-.m-emoji{font-size:58px;line-height:1;margin-bottom:6px}
-.m-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--ink);margin-bottom:8px}
-.m-badge{display:inline-block;padding:5px 18px;border-radius:30px;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
-.badge-n{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green)}
-.badge-v{background:var(--gold-bg);color:var(--ink2);border:1.5px solid var(--gold)}
-.badge-d{background:#F5D78E;color:#3D2B0A;border:1.5px solid #C9921A}
-.m-time{font-size:12px;color:var(--muted);margin-bottom:1.4rem}
-
-.btn-ok{
-  background:var(--green);color:white;border:none;border-radius:11px;
-  width:100%;padding:.9rem;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .2s;
+.m-pill{width:40px;height:4px;border-radius:2px;background:var(--border2);margin:14px auto 0}
+.m-hero{padding:22px 20px 16px;position:relative;overflow:hidden;text-align:center}
+.m-hero-glow-nm{
+  position:absolute;bottom:0;left:10%;right:10%;height:60%;
+  background:radial-gradient(ellipse,rgba(42,155,90,.14),transparent 70%);pointer-events:none;
 }
-.btn-ok:hover{filter:brightness(1.15)}
-.btn-ok.gold-ok{background:var(--gold);color:var(--ink)}
+.m-hero-glow-vp{
+  position:absolute;bottom:0;left:10%;right:10%;height:60%;
+  background:radial-gradient(ellipse,rgba(212,168,67,.2),transparent 70%);pointer-events:none;
+}
+.m-emoji{font-size:52px;line-height:1;margin-bottom:8px;position:relative;z-index:1}
+.m-name{
+  font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;
+  color:var(--text);margin-bottom:6px;line-height:1.2;position:relative;z-index:1;
+}
+.m-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 14px;border-radius:20px;
+  font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  position:relative;z-index:1;
+}
+.b-nm{background:rgba(42,155,90,.12);color:#6BE4A0;border:1px solid rgba(42,155,90,.25)}
+.b-vp{background:rgba(212,168,67,.12);color:var(--gold2);border:1px solid rgba(212,168,67,.28)}
+.b-dn{background:rgba(212,168,67,.18);color:var(--gold2);border:1px solid rgba(212,168,67,.38)}
+.m-time{font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:8px;position:relative;z-index:1}
+
+.m-div{height:1px;background:var(--border);margin:0 20px 18px}
+
+.m-btns{padding:0 16px}
+.btn-confirm{
+  width:100%;padding:17px;border-radius:14px;border:none;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;
+  letter-spacing:3px;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .15s,filter .2s;
+}
+.btn-confirm:active{transform:scale(.98)}
+.c-nm{background:var(--green);color:white;box-shadow:0 4px 20px rgba(42,155,90,.25)}
+.c-vp{
+  background:linear-gradient(135deg,#B8820F,#F2CE7A,#B8820F);background-size:200% 100%;
+  color:#0a0700;box-shadow:0 4px 24px rgba(212,168,67,.3);
+}
+.c-vp:hover{background-position:100% 0}
 .btn-skip{
-  background:none;border:none;width:100%;margin-top:10px;
-  padding:.5rem;font-size:13px;color:var(--muted);cursor:pointer;
+  width:100%;padding:11px;margin-top:6px;border:none;background:none;
+  font-size:12px;color:var(--text3);cursor:pointer;letter-spacing:.5px;
 }
-.btn-skip:hover{color:var(--ink)}
+.btn-skip:hover{color:var(--text2)}
 
-/* Settings toggle */
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:white;border-bottom:1px solid #f0e8d6}
-.setting-row:last-child{border-bottom:none}
-.setting-label{display:flex;flex-direction:column;gap:3px}
-.setting-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--ink)}
-.setting-desc{font-size:12px;color:var(--muted)}
-.toggle-wrap{position:relative;width:48px;height:26px;flex-shrink:0}
-.toggle-wrap input{opacity:0;width:0;height:0;position:absolute}
-.toggle-track{
-  position:absolute;inset:0;border-radius:13px;
-  background:#D4B97A;cursor:pointer;transition:.25s;
+/* GUEST LIST */
+.gl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.gl-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--text)}
+.gl-meta{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-top:3px}
+.btn-clr{
+  background:none;border:1px solid var(--border2);border-radius:8px;
+  padding:7px 12px;font-size:11px;color:var(--text3);cursor:pointer;
+  display:flex;align-items:center;gap:5px;font-family:'Barlow',sans-serif;transition:all .2s;
 }
-.toggle-wrap input:checked + .toggle-track{background:var(--green)}
-.toggle-thumb{
-  position:absolute;top:3px;left:3px;
-  width:20px;height:20px;border-radius:50%;
-  background:white;transition:.25s;pointer-events:none;
-}
-.toggle-wrap input:checked ~ .toggle-thumb{left:25px}
-.vib-demo{display:flex;gap:8px;margin-top:1.2rem}
-.vib-demo button{
-  flex:1;padding:.65rem;border-radius:8px;border:1.5px solid var(--border);
-  background:white;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
-  color:var(--ink2);transition:.15s;
-}
-.vib-demo button:active{transform:scale(.97)}
-.vib-demo button.gold-test{background:var(--gold-bg);border-color:var(--gold);color:var(--ink2)}
-.setting-section-title{
-  font-family:'Syne',sans-serif;font-weight:800;font-size:11px;
-  letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--muted);padding:.75rem 1.25rem .4rem;
-}
-.gl-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-.gl-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem}
-.gl-meta{font-size:12px;color:var(--muted)}
-.btn-clr{background:none;border:1.5px solid #ddd;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:5px}
-.btn-clr:hover{border-color:#e44;color:#c33}
+.btn-clr:hover{border-color:#C0392B;color:#C0392B}
 
-.gl-section{margin-bottom:1.2rem}
-.gl-head{
-  display:flex;align-items:center;gap:8px;
-  font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
-  padding:8px 14px;border-radius:10px 10px 0 0;
+.gl-sec{margin-bottom:18px}
+.gl-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:10px 10px 0 0;
 }
-.gl-head.sp{background:var(--gold-bg);color:var(--ink2);border:1.5px solid var(--gold);border-bottom:none}
-.gl-head.nm{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green);border-bottom:none}
-.gl-cnt{margin-left:auto;border-radius:10px;padding:2px 9px;font-size:11px}
-.gl-head.sp .gl-cnt{background:var(--gold);color:var(--ink)}
-.gl-head.nm .gl-cnt{background:var(--green);color:white}
+.gl-hd.vp{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.18);border-bottom:none}
+.gl-hd.nm{background:rgba(42,155,90,.06);border:1px solid rgba(42,155,90,.16);border-bottom:none}
+.gl-hd-lbl{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:6px;
+}
+.gl-hd.vp .gl-hd-lbl{color:var(--gold2)}
+.gl-hd.nm .gl-hd-lbl{color:#6BE4A0}
+.gl-cnt{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.gl-hd.vp .gl-cnt{background:rgba(212,168,67,.18);color:var(--gold2)}
+.gl-hd.nm .gl-cnt{background:rgba(42,155,90,.15);color:#6BE4A0}
 
-.gl-body{border-radius:0 0 10px 10px;overflow:hidden;border:1.5px solid var(--border);border-top:none}
-.gl-empty{padding:1rem;text-align:center;font-size:13px;color:var(--muted);background:white}
+.gl-body{border-radius:0 0 10px 10px;overflow:hidden;border:1px solid var(--border);border-top:none}
+.gl-empty{padding:20px;text-align:center;font-size:12px;color:var(--text3);background:var(--card)}
 .gl-row{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;background:white;border-bottom:1px solid #f0e8d6;
-  animation:slIn .3s ease;
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--card);border-bottom:1px solid var(--border);
+  animation:rowIn .25s ease both;
 }
 .gl-row:last-child{border-bottom:none}
-@keyframes slIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1}}
-
-.gl-num{width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.gl-num.g{background:var(--gold);color:var(--ink)}
-.gl-num.n{background:var(--green);color:white}
+@keyframes rowIn{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+.gl-num{
+  width:26px;height:26px;border-radius:50%;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.gl-num.g{background:rgba(212,168,67,.12);color:var(--gold2);border:1px solid rgba(212,168,67,.2)}
+.gl-num.n{background:rgba(42,155,90,.1);color:#6BE4A0;border:1px solid rgba(42,155,90,.18)}
 .gl-info{flex:1;min-width:0}
-.gl-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gl-type{font-size:11px;color:var(--muted)}
-.gl-time{font-size:11px;color:var(--muted);white-space:nowrap}
+.gl-rname{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.gl-rtype{font-size:10px;color:var(--text3);margin-top:2px}
+.gl-rtime{font-size:10px;color:var(--text3);white-space:nowrap}
+
+/* SETTINGS */
+.s-section{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.s-title{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:700;
+  color:var(--text3);padding:12px 16px 8px;border-bottom:1px solid var(--border);
+}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+.s-row:last-child{border-bottom:none}
+.s-info .s-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.s-info .s-desc{font-size:11px;color:var(--text3);line-height:1.4}
+.toggle-wrap{position:relative;width:46px;height:24px;flex-shrink:0}
+.toggle-wrap input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;border-radius:12px;background:var(--border2);cursor:pointer;transition:.25s}
+.toggle-wrap input:checked + .toggle-track{background:var(--gold-dim)}
+.toggle-thumb{
+  position:absolute;top:3px;left:3px;width:18px;height:18px;
+  border-radius:50%;background:white;transition:.25s;pointer-events:none;
+  box-shadow:0 1px 4px rgba(0,0,0,.5);
+}
+.toggle-wrap input:checked ~ .toggle-thumb{left:25px}
+.test-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px}
+.test-btn{
+  padding:10px;border-radius:10px;border:1px solid var(--border2);
+  background:var(--card2);font-family:'Barlow',sans-serif;font-weight:600;font-size:12px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  color:var(--text2);transition:.15s;
+}
+.test-btn:active{transform:scale(.97)}
+.test-btn.gold{background:rgba(212,168,67,.06);border-color:rgba(212,168,67,.2);color:var(--gold2)}
+.s-note{font-size:11px;color:var(--text3);text-align:center;padding:6px 16px 4px;line-height:1.6}
 </style>
 </head>
 <body>
 
-<!-- MODAL -->
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <div class="m-emoji" id="m-emoji"></div>
-    <div class="m-name"  id="m-name"></div>
-    <div class="m-badge" id="m-badge"></div>
-    <div class="m-time"  id="m-time"></div>
-    <button class="btn-ok" id="m-ok" onclick="confirmScan()">
-      <i class="ti ti-check"></i> Confirm Entry
-    </button>
-    <button class="btn-skip" onclick="dismissScan()">Not now</button>
-  </div>
-</div>
-
-<div class="header">
-  <div class="header-logo">QR</div>
-  <div class="header-title">SOMALILAND NIGHT</div>
-</div>
-
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('generate',this)"><i class="ti ti-qrcode"></i> Create QR</div>
-  <div class="tab"        onclick="switchTab('scanner',this)"><i class="ti ti-scan"></i> Scan</div>
-  <div class="tab"        onclick="switchTab('guestlist',this)"><i class="ti ti-list"></i> Guests</div>
-  <div class="tab"        onclick="switchTab('settings',this)"><i class="ti ti-settings"></i> Settings</div>
-</div>
-
-<div class="content">
-
-  <!-- CREATE QR -->
-  <div class="panel active" id="panel-generate">
-    <div class="card">
-      <h3 style="font-family:Syne;margin-bottom:15px">Create New Ticket</h3>
-      <label>Attendee Name</label>
-      <input type="text" id="f-name" placeholder="Enter Full Name">
-      <label>Ticket Class</label>
-      <select id="f-type">
-        <option value="Normal Guest">Normal Guest</option>
-        <option value="VIP">VIP</option>
-        <option value="VIP WITH DINNER">VIP WITH DINNER</option>
-      </select>
-      <button class="btn btn-gold" onclick="generateQR()">Generate Ticket</button>
+<header class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-emblem">SN</div>
+    <div>
+      <div class="hdr-name">Somaliland Night</div>
+      <div class="hdr-sub">Entry Management</div>
     </div>
-    <div class="card" id="qr-output" style="display:none">
-      <div id="qr-canvas" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
-      <h2 id="t-name"></h2>
-      <p  id="t-type" style="font-weight:700"></p>
+  </div>
+  <div class="hdr-count">
+    <div class="hdr-count-num" id="scan-count">0</div>
+    <div class="hdr-count-lbl">Checked In</div>
+  </div>
+</header>
+
+<div class="screen">
+
+  <!-- CREATE -->
+  <div class="panel active" id="panel-generate">
+    <div class="sec-label">New Ticket</div>
+
+    <div class="form-group">
+      <label class="form-label">Attendee Name</label>
+      <input class="form-input" type="text" id="f-name" placeholder="Full name…" autocomplete="off">
+    </div>
+
+    <label class="form-label">Ticket Class</label>
+    <div class="type-grid">
+      <div class="type-pill sel" data-val="Normal Guest" onclick="selType(this)">
+        <div class="type-pill-icon">🎟️</div>
+        <div class="type-pill-name">General</div>
+      </div>
+      <div class="type-pill" data-val="VIP" onclick="selType(this)">
+        <div class="type-pill-icon">⭐</div>
+        <div class="type-pill-name">VIP</div>
+      </div>
+      <div class="type-pill" data-val="VIP WITH DINNER" onclick="selType(this)">
+        <div class="type-pill-icon">🍽️</div>
+        <div class="type-pill-name">VIP+Dinner</div>
+      </div>
+    </div>
+
+    <button class="btn-gen" onclick="generateQR()">Generate Ticket</button>
+
+    <div id="qr-output" style="display:none">
+      <div class="qr-card">
+        <div class="qr-card-type" id="t-type-lbl"></div>
+        <div id="qr-canvas"></div>
+        <div class="qr-name" id="t-name"></div>
+        <div class="qr-sub" id="t-type"></div>
+      </div>
     </div>
   </div>
 
   <!-- SCANNER -->
   <div class="panel" id="panel-scanner">
-    <div style="text-align:center">
-      <div class="scan-badge">Total Scanned: <span id="scan-count">0</span></div>
-    </div>
-    <div class="card" style="padding:10px;background:#000">
-      <div class="scanner-wrap">
-        <div id="reader"></div>
-        <div class="cooldown-overlay" id="cooldown">
-          <div class="spin-ring"></div>
-          <div class="cooldown-label">Processing…</div>
-        </div>
+    <div class="scan-stats">
+      <div class="stat-box">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-lbl">Total Scanned</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-vip">0</div>
+        <div class="stat-lbl">VIP Entries</div>
       </div>
     </div>
-    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:-0.5rem">Point camera at ticket QR code</p>
+
+    <div class="scanner-wrap">
+      <div id="reader"></div>
+      <div class="scan-corners">
+        <div class="sc tl"><svg viewBox="0 0 28 28" fill="none"><path d="M0 20V4a4 4 0 014-4h16" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+        <div class="sc tr"><svg viewBox="0 0 28 28" fill="none"><path d="M0 20V4a4 4 0 014-4h16" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+        <div class="sc bl"><svg viewBox="0 0 28 28" fill="none"><path d="M0 20V4a4 4 0 014-4h16" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+        <div class="sc br"><svg viewBox="0 0 28 28" fill="none"><path d="M0 20V4a4 4 0 014-4h16" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+        <div class="scan-beam"></div>
+      </div>
+      <div class="cooldown-overlay" id="cooldown">
+        <div class="c-ring"></div>
+        <div class="c-text">Reading…</div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:-4px">Point camera at ticket QR</p>
   </div>
 
-  <!-- GUEST LIST -->
+  <!-- GUESTS -->
   <div class="panel" id="panel-guestlist">
-    <div class="gl-header-row">
+    <div class="gl-top">
       <div>
-        <div class="gl-title">Guest List</div>
+        <div class="gl-title">Guest Log</div>
         <div class="gl-meta" id="gl-meta">0 checked in</div>
       </div>
-      <button class="btn-clr" onclick="clearList()"><i class="ti ti-trash"></i> Clear All</button>
+      <button class="btn-clr" onclick="clearList()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Clear
+      </button>
     </div>
-
-    <div class="gl-section">
-      <div class="gl-head sp"><i class="ti ti-star-filled"></i> VIP &amp; Special Guests<span class="gl-cnt" id="cnt-vip">0</span></div>
+    <div class="gl-sec">
+      <div class="gl-hd vp">
+        <div class="gl-hd-lbl">⭐ VIP &amp; Special</div>
+        <div class="gl-cnt" id="cnt-vip">0</div>
+      </div>
       <div class="gl-body" id="list-vip"><div class="gl-empty">No VIP guests yet</div></div>
     </div>
-
-    <div class="gl-section">
-      <div class="gl-head nm"><i class="ti ti-users"></i> Normal Guests<span class="gl-cnt" id="cnt-nm">0</span></div>
-      <div class="gl-body" id="list-nm"><div class="gl-empty">No normal guests yet</div></div>
+    <div class="gl-sec">
+      <div class="gl-hd nm">
+        <div class="gl-hd-lbl">👥 General Guests</div>
+        <div class="gl-cnt" id="cnt-nm">0</div>
+      </div>
+      <div class="gl-body" id="list-nm"><div class="gl-empty">No general guests yet</div></div>
     </div>
   </div>
 
   <!-- SETTINGS -->
   <div class="panel" id="panel-settings">
-    <div style="font-family:Syne;font-weight:800;font-size:1.05rem;margin-bottom:1rem">Settings</div>
-
-    <div style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem">
-      <div class="setting-section-title">Haptic feedback</div>
-
-      <div class="setting-row">
-        <div class="setting-label">
-          <div class="setting-title"><i class="ti ti-device-mobile-vibration" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Vibration on scan</div>
-          <div class="setting-desc">Vibrate when a QR is confirmed</div>
+    <div class="sec-label">Preferences</div>
+    <div class="s-section">
+      <div class="s-title">Haptic &amp; Sound</div>
+      <div class="s-row">
+        <div class="s-info">
+          <div class="s-name">Vibration on confirm</div>
+          <div class="s-desc">Buzz when entry is confirmed</div>
         </div>
         <label class="toggle-wrap">
-          <input type="checkbox" id="vib-toggle" checked onchange="saveVibSetting()">
+          <input type="checkbox" id="vib-toggle" checked onchange="saveVib()">
           <div class="toggle-track"></div>
           <div class="toggle-thumb"></div>
         </label>
       </div>
-
-      <div class="setting-row" id="vib-pattern-row" style="opacity:1;pointer-events:all">
-        <div class="setting-label">
-          <div class="setting-title">VIP double pulse</div>
-          <div class="setting-desc">Normal = 1 short buzz &nbsp;·&nbsp; VIP &amp; Dinner = 2 buzzes</div>
+      <div class="s-row" id="vib-pattern-row">
+        <div class="s-info">
+          <div class="s-name">VIP double pulse</div>
+          <div class="s-desc">VIP & Dinner = 2 buzzes · General = 1</div>
         </div>
-        <i class="ti ti-check" style="color:var(--green);font-size:18px"></i>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2A9B5A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-    </div>
-
-    <div id="vib-test-wrap" style="display:block">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;text-align:center">Test vibration patterns</div>
-      <div class="vib-demo">
-        <button onclick="testVib('normal')"><i class="ti ti-device-mobile-vibration"></i> Normal (×1)</button>
-        <button class="gold-test" onclick="testVib('vip')"><i class="ti ti-device-mobile-vibration"></i> VIP (×2)</button>
+      <div class="test-btns" id="vib-test-wrap">
+        <button class="test-btn" onclick="testVib('normal')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Normal ×1
+        </button>
+        <button class="test-btn gold" onclick="testVib('vip')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          VIP ×2
+        </button>
       </div>
+      <p class="s-note">Requires a supported mobile browser.<br>On iOS, silent mode must be off.</p>
     </div>
-
-    <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:1.2rem">
-      Requires a supported mobile browser. On iOS, silent mode must be off.
-    </p>
   </div>
 
 </div>
 
+<!-- BOTTOM NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchTab('generate',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="2" height="2"/><rect x="19" y="19" width="2" height="2"/></svg>
+    <div class="nav-label">Create</div>
+  </button>
+  <button class="nav-btn" onclick="switchTab('scanner',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+    <div class="nav-label">Scan</div>
+  </button>
+  <button class="nav-btn" onclick="switchTab('guestlist',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+    <div class="nav-label">Guests</div>
+  </button>
+  <button class="nav-btn" onclick="switchTab('settings',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <div class="nav-label">Settings</div>
+  </button>
+</nav>
+
+<!-- SCAN MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal nm" id="modal">
+    <div class="m-pill"></div>
+    <div class="m-hero">
+      <div id="m-glow"></div>
+      <div class="m-emoji" id="m-emoji"></div>
+      <div class="m-name" id="m-name"></div>
+      <div class="m-badge" id="m-badge"></div>
+      <div class="m-time" id="m-time"></div>
+    </div>
+    <div class="m-div"></div>
+    <div class="m-btns">
+      <button class="btn-confirm c-nm" id="m-ok" onclick="confirmScan()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirm Entry
+      </button>
+      <button class="btn-skip" onclick="dismissScan()">Dismiss</button>
+    </div>
+  </div>
+</div>
+
 <script>
-let scanner = null, cooling = false, pending = null;
-let total = parseInt(localStorage.getItem('sl_scans') || '0');
-let log   = JSON.parse(localStorage.getItem('sl_log')  || '[]');
-// Default haptic ON (only false if explicitly saved as 'false')
-let vibOn = localStorage.getItem('sl_vib') !== 'false';
+let scanner=null,cooling=false,pending=null;
+let total=parseInt(localStorage.getItem('sl_scans')||'0');
+let log=JSON.parse(localStorage.getItem('sl_log')||'[]');
+let vibOn=localStorage.getItem('sl_vib')!=='false';
 
-// AudioContext beep — works on iOS/Android without external URL
-function playBeep(type) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    if (type === 'vip') {
-      // Two-tone chime for VIP
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.35);
+// Audio
+let _ctx=null;
+function getCtx(){
+  if(!_ctx) _ctx=new(window.AudioContext||window.webkitAudioContext)();
+  if(_ctx.state==='suspended') _ctx.resume();
+  return _ctx;
+}
+document.addEventListener('touchstart',()=>{try{getCtx()}catch(e){}},{once:true});
+document.addEventListener('click',()=>{try{getCtx()}catch(e){}},{once:true});
+
+function playBeep(type){
+  try{
+    const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    if(type==='vip'){
+      o.frequency.setValueAtTime(880,c.currentTime);
+      o.frequency.setValueAtTime(1100,c.currentTime+.13);
+      g.gain.setValueAtTime(.5,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);
+      o.start(c.currentTime);o.stop(c.currentTime+.4);
     } else {
-      // Single clean beep for normal
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.2);
+      o.frequency.setValueAtTime(880,c.currentTime);
+      g.gain.setValueAtTime(.5,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.22);
+      o.start(c.currentTime);o.stop(c.currentTime+.22);
     }
-  } catch(e) {}
+  }catch(e){}
+}
+function buzz(type){
+  if(!vibOn||!navigator.vibrate) return;
+  navigator.vibrate(type==='vip'?[120,80,120]:[150]);
 }
 
-document.getElementById('scan-count').textContent = total;
+// Init
+document.getElementById('scan-count').textContent=total;
+document.getElementById('stat-total').textContent=total;
+document.getElementById('stat-vip').textContent=log.filter(g=>g.t!=='Normal Guest').length;
+document.getElementById('vib-toggle').checked=vibOn;
+updateVibUI();
 
-// Init toggle state on load
-window.addEventListener('DOMContentLoaded', () => {
-  const tog = document.getElementById('vib-toggle');
-  tog.checked = vibOn;
-  updateVibUI();
-});
-
-function saveVibSetting() {
-  vibOn = document.getElementById('vib-toggle').checked;
-  localStorage.setItem('sl_vib', vibOn);
-  updateVibUI();
+// Type picker
+let selTypeVal='Normal Guest';
+function selType(el){
+  document.querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel'); selTypeVal=el.dataset.val;
 }
 
-function updateVibUI() {
-  const row  = document.getElementById('vib-pattern-row');
-  const wrap = document.getElementById('vib-test-wrap');
-  row.style.opacity        = vibOn ? '1'     : '.4';
-  row.style.pointerEvents  = vibOn ? 'all'   : 'none';
-  wrap.style.display       = vibOn ? 'block' : 'none';
+// Generate QR
+function generateQR(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name) return alert('Enter a name');
+  document.getElementById('qr-output').style.display='block';
+  document.getElementById('t-name').textContent=name;
+  document.getElementById('t-type').textContent=selTypeVal;
+  const isVip=selTypeVal!=='Normal Guest';
+  const lbl=document.getElementById('t-type-lbl');
+  lbl.textContent=isVip?'✦ Special Access':'General Admission';
+  lbl.className='qr-card-type '+(isVip?'vip':'normal');
+  const c=document.getElementById('qr-canvas'); c.innerHTML='';
+  new QRCode(c,{text:JSON.stringify({n:name,t:selTypeVal}),width:200,height:200,colorDark:'#1A1209',colorLight:'#ffffff'});
 }
 
-function buzz(type) {
-  if (!vibOn || !navigator.vibrate) return;
-  if (type === 'vip') {
-    navigator.vibrate([100, 80, 100]); // two pulses
-  } else {
-    navigator.vibrate(120); // one short buzz
-  }
-}
-
-function testVib(type) { buzz(type); }
-
-function switchTab(id, el) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+// Tab switch
+function switchTab(id,el){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  if (id==='scanner') { document.getElementById('scan-count').textContent=total; startScanner(); }
+  if(id==='scanner'){startScanner();updateStats();}
   else stopScanner();
-  if (id==='guestlist') renderList();
+  if(id==='guestlist') renderList();
+}
+function updateStats(){
+  document.getElementById('scan-count').textContent=total;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-vip').textContent=log.filter(g=>g.t!=='Normal Guest').length;
 }
 
-function generateQR() {
-  const name = document.getElementById('f-name').value.trim();
-  const type = document.getElementById('f-type').value;
-  if (!name) return alert('Enter a name');
-  document.getElementById('qr-output').style.display='block';
-  document.getElementById('t-name').textContent=name;
-  document.getElementById('t-type').textContent=type;
-  const c=document.getElementById('qr-canvas');
-  c.innerHTML='';
-  new QRCode(c,{text:JSON.stringify({n:name,t:type}),width:200,height:200});
-}
-
-function startScanner() {
-  if (scanner) return;
-  scanner = new Html5Qrcode('reader');
-  scanner.start({facingMode:'environment'},{fps:10,qrbox:250},txt=>{
-    if (cooling) return;
-    try { onDetect(JSON.parse(txt)); } catch(e){ alert('Invalid QR'); }
+// Scanner
+function startScanner(){
+  if(scanner) return;
+  scanner=new Html5Qrcode('reader');
+  scanner.start({facingMode:'environment'},{fps:10,qrbox:220},txt=>{
+    if(cooling) return;
+    try{onDetect(JSON.parse(txt));}catch(e){}
   });
 }
-
-function stopScanner() {
-  if (scanner){ scanner.stop().catch(()=>{}); scanner=null; }
-}
-
-function onDetect(data) {
-  cooling=true; pending=data;
+function stopScanner(){if(scanner){scanner.stop().catch(()=>{});scanner=null;}}
+function onDetect(data){
+  cooling=true;pending=data;
   document.getElementById('cooldown').classList.add('on');
-  // Fire haptic + beep immediately on every scan detection
-  const isVip = data.t === 'VIP' || data.t === 'VIP WITH DINNER';
-  buzz(isVip ? 'vip' : 'normal');
-  playBeep(isVip ? 'vip' : 'normal');
-  // 1-second pause, then show popup
-  setTimeout(()=>openModal(data), 1000);
+  setTimeout(()=>openModal(data),900);
 }
 
-function openModal(data) {
-  const isd = data.t==='VIP WITH DINNER';
-  const isv = data.t==='VIP';
-  const isSpecial = isv || isd;
-  document.getElementById('m-emoji').textContent = isd?'🍽️': isv?'⭐':'✅';
-  document.getElementById('m-name').textContent  = data.n;
-  document.getElementById('m-time').textContent  = 'Scanned at '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+// Modal
+function openModal(data){
+  const isd=data.t==='VIP WITH DINNER',isv=data.t==='VIP',isS=isv||isd;
+  document.getElementById('m-emoji').textContent=isd?'🍽️':isv?'⭐':'🎟️';
+  document.getElementById('m-name').textContent=data.n;
+  document.getElementById('m-time').textContent='Scanned at '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
   const b=document.getElementById('m-badge');
-  b.className='m-badge '+(isd?'badge-d':isv?'badge-v':'badge-n');
-  b.textContent = isd?'VIP · Dinner Included': isv?'VIP Guest':'Normal Guest';
-  const ok=document.getElementById('m-ok');
-  ok.className='btn-ok'+(isSpecial?' gold-ok':'');
-  // Golden bg for VIP/Special, default surface for Normal
-  const modal = document.querySelector('.modal');
-  if (isSpecial) {
-    modal.style.background = 'linear-gradient(145deg,#FDF1C8,#F5D78E)';
-    modal.style.borderColor = '#C9921A';
-  } else {
-    modal.style.background = '';
-    modal.style.borderColor = '';
-  }
+  b.className='m-badge '+(isd?'b-dn':isv?'b-vp':'b-nm');
+  b.textContent=isd?'✦ VIP · Dinner Included':isv?'✦ VIP Guest':'General Admission';
+  document.getElementById('m-ok').className='btn-confirm '+(isS?'c-vp':'c-nm');
+  document.getElementById('modal').className='modal '+(isS?'vp':'nm');
+  document.getElementById('m-glow').className=isS?'m-hero-glow-vp':'m-hero-glow-nm';
   document.getElementById('overlay').classList.add('show');
 }
-
-function confirmScan() {
-  if (!pending) return;
+function confirmScan(){
+  if(!pending) return;
   total++;
   localStorage.setItem('sl_scans',total);
-  document.getElementById('scan-count').textContent=total;
   log.push({n:pending.n,t:pending.t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
   localStorage.setItem('sl_log',JSON.stringify(log));
+  const isVip=pending.t==='VIP'||pending.t==='VIP WITH DINNER';
+  buzz(isVip?'vip':'normal');
+  playBeep(isVip?'vip':'normal');
+  updateStats();
   closeModal();
 }
-
-function dismissScan() { closeModal(); }
-
-function closeModal() {
+function dismissScan(){closeModal();}
+function closeModal(){
   document.getElementById('overlay').classList.remove('show');
-  setTimeout(()=>{
-    document.getElementById('cooldown').classList.remove('on');
-    cooling=false; pending=null;
-  },2000);
+  setTimeout(()=>{document.getElementById('cooldown').classList.remove('on');cooling=false;pending=null;},2000);
 }
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)dismissScan();});
 
-document.getElementById('overlay').addEventListener('click',function(e){
-  if(e.target===this) dismissScan();
-});
-
-function renderList() {
-  const vips = log.filter(g=>g.t!=='Normal Guest');
-  const nrms = log.filter(g=>g.t==='Normal Guest');
-  document.getElementById('cnt-vip').textContent = vips.length;
-  document.getElementById('cnt-nm').textContent  = nrms.length;
-  document.getElementById('gl-meta').textContent = log.length+' checked in';
-  renderSection('list-vip', vips, true);
-  renderSection('list-nm',  nrms, false);
+// Guest list
+function renderList(){
+  const vips=log.filter(g=>g.t!=='Normal Guest');
+  const nrms=log.filter(g=>g.t==='Normal Guest');
+  document.getElementById('cnt-vip').textContent=vips.length;
+  document.getElementById('cnt-nm').textContent=nrms.length;
+  document.getElementById('gl-meta').textContent=log.length+' checked in';
+  renderSec('list-vip',vips,true);
+  renderSec('list-nm',nrms,false);
 }
-
-function renderSection(id, list, isVip) {
+function renderSec(id,list,isVip){
   const el=document.getElementById(id);
-  if (!list.length){ el.innerHTML=`<div class="gl-empty">${isVip?'No VIP guests yet':'No normal guests yet'}</div>`; return; }
+  if(!list.length){el.innerHTML=`<div class="gl-empty">${isVip?'No VIP guests yet':'No general guests yet'}</div>`;return;}
   el.innerHTML=list.map((g,i)=>`
     <div class="gl-row">
       <div class="gl-num ${isVip?'g':'n'}">${i+1}</div>
-      <div class="gl-info"><div class="gl-name">${g.n}</div><div class="gl-type">${g.t}</div></div>
-      <div class="gl-time">${g.time}</div>
+      <div class="gl-info"><div class="gl-rname">${g.n}</div><div class="gl-rtype">${g.t}</div></div>
+      <div class="gl-rtime">${g.time}</div>
     </div>`).join('');
 }
-
-function clearList() {
+function clearList(){
   if(!confirm('Clear the entire guest log?')) return;
-  log=[]; total=0;
+  log=[];total=0;
   localStorage.removeItem('sl_log');
   localStorage.setItem('sl_scans','0');
-  document.getElementById('scan-count').textContent=0;
-  renderList();
+  updateStats();renderList();
 }
+
+// Settings
+function saveVib(){
+  vibOn=document.getElementById('vib-toggle').checked;
+  localStorage.setItem('sl_vib',vibOn);
+  updateVibUI();
+}
+function updateVibUI(){
+  const row=document.getElementById('vib-pattern-row');
+  const wrap=document.getElementById('vib-test-wrap');
+  [row,wrap].forEach(el=>{el.style.opacity=vibOn?'1':'.3';el.style.pointerEvents=vibOn?'all':'none';});
+}
+function testVib(type){buzz(type);playBeep(type);}
 </script>
 </body>
 </html>
