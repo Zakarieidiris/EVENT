@@ -92,7 +92,39 @@ input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;m
 }
 .btn-skip:hover{color:var(--ink)}
 
-/* Guest list */
+/* Settings toggle */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:white;border-bottom:1px solid #f0e8d6}
+.setting-row:last-child{border-bottom:none}
+.setting-label{display:flex;flex-direction:column;gap:3px}
+.setting-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--ink)}
+.setting-desc{font-size:12px;color:var(--muted)}
+.toggle-wrap{position:relative;width:48px;height:26px;flex-shrink:0}
+.toggle-wrap input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{
+  position:absolute;inset:0;border-radius:13px;
+  background:#D4B97A;cursor:pointer;transition:.25s;
+}
+.toggle-wrap input:checked + .toggle-track{background:var(--green)}
+.toggle-thumb{
+  position:absolute;top:3px;left:3px;
+  width:20px;height:20px;border-radius:50%;
+  background:white;transition:.25s;pointer-events:none;
+}
+.toggle-wrap input:checked ~ .toggle-thumb{left:25px}
+.vib-demo{display:flex;gap:8px;margin-top:1.2rem}
+.vib-demo button{
+  flex:1;padding:.65rem;border-radius:8px;border:1.5px solid var(--border);
+  background:white;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  color:var(--ink2);transition:.15s;
+}
+.vib-demo button:active{transform:scale(.97)}
+.vib-demo button.gold-test{background:var(--gold-bg);border-color:var(--gold);color:var(--ink2)}
+.setting-section-title{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:11px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);padding:.75rem 1.25rem .4rem;
+}
 .gl-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 .gl-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem}
 .gl-meta{font-size:12px;color:var(--muted)}
@@ -155,6 +187,7 @@ input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;m
   <div class="tab active" onclick="switchTab('generate',this)"><i class="ti ti-qrcode"></i> Create QR</div>
   <div class="tab"        onclick="switchTab('scanner',this)"><i class="ti ti-scan"></i> Scan</div>
   <div class="tab"        onclick="switchTab('guestlist',this)"><i class="ti ti-list"></i> Guests</div>
+  <div class="tab"        onclick="switchTab('settings',this)"><i class="ti ti-settings"></i> Settings</div>
 </div>
 
 <div class="content">
@@ -218,14 +251,88 @@ input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;m
     </div>
   </div>
 
+  <!-- SETTINGS -->
+  <div class="panel" id="panel-settings">
+    <div style="font-family:Syne;font-weight:800;font-size:1.05rem;margin-bottom:1rem">Settings</div>
+
+    <div style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem">
+      <div class="setting-section-title">Haptic feedback</div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          <div class="setting-title"><i class="ti ti-device-mobile-vibration" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Vibration on scan</div>
+          <div class="setting-desc">Vibrate when a QR is confirmed</div>
+        </div>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="vib-toggle" onchange="saveVibSetting()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="setting-row" id="vib-pattern-row" style="opacity:.4;pointer-events:none">
+        <div class="setting-label">
+          <div class="setting-title">VIP double pulse</div>
+          <div class="setting-desc">Normal = 1 short buzz &nbsp;·&nbsp; VIP &amp; Dinner = 2 buzzes</div>
+        </div>
+        <i class="ti ti-check" style="color:var(--green);font-size:18px"></i>
+      </div>
+    </div>
+
+    <div id="vib-test-wrap" style="display:none">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;text-align:center">Test vibration patterns</div>
+      <div class="vib-demo">
+        <button onclick="testVib('normal')"><i class="ti ti-device-mobile-vibration"></i> Normal (×1)</button>
+        <button class="gold-test" onclick="testVib('vip')"><i class="ti ti-device-mobile-vibration"></i> VIP (×2)</button>
+      </div>
+    </div>
+
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:1.2rem">
+      Requires a supported mobile browser. On iOS, silent mode must be off.
+    </p>
+  </div>
+
 </div>
 
 <script>
 let scanner = null, cooling = false, pending = null;
 let total = parseInt(localStorage.getItem('sl_scans') || '0');
 let log   = JSON.parse(localStorage.getItem('sl_log')  || '[]');
+let vibOn = localStorage.getItem('sl_vib') === 'true';
 
 document.getElementById('scan-count').textContent = total;
+
+// Init toggle state on load
+window.addEventListener('DOMContentLoaded', () => {
+  const tog = document.getElementById('vib-toggle');
+  tog.checked = vibOn;
+  updateVibUI();
+});
+
+function saveVibSetting() {
+  vibOn = document.getElementById('vib-toggle').checked;
+  localStorage.setItem('sl_vib', vibOn);
+  updateVibUI();
+}
+
+function updateVibUI() {
+  const row  = document.getElementById('vib-pattern-row');
+  const wrap = document.getElementById('vib-test-wrap');
+  row.style.opacity        = vibOn ? '1'     : '.4';
+  row.style.pointerEvents  = vibOn ? 'all'   : 'none';
+  wrap.style.display       = vibOn ? 'block' : 'none';
+}
+
+function buzz(type) {
+  if (!vibOn || !navigator.vibrate) return;
+  if (type === 'vip') {
+    navigator.vibrate([100, 80, 100]); // two pulses
+  } else {
+    navigator.vibrate(120); // one short buzz
+  }
+}
+
+function testVib(type) { buzz(type); }
 
 function switchTab(id, el) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -291,6 +398,9 @@ function confirmScan() {
   document.getElementById('scan-count').textContent=total;
   log.push({n:pending.n,t:pending.t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
   localStorage.setItem('sl_log',JSON.stringify(log));
+  // Haptic feedback — 1 pulse normal, 2 pulses VIP
+  const isVip = pending.t==='VIP' || pending.t==='VIP WITH DINNER';
+  buzz(isVip ? 'vip' : 'normal');
   closeModal();
 }
 
