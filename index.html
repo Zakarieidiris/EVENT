@@ -11,8 +11,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --gold:#C9921A; --gold-light:#F5D78E; --ink:#1A1209; --ink2:#3D2B0A; --muted:#7A6540;
-  --surface:#FFFDF7; --border:#D4B97A; --green:#1A7A3D; --green-bg:#D4F0DF; --gold-bg:#FDF6E3;
+  --gold:#C9921A;--gold-light:#F5D78E;--ink:#1A1209;--ink2:#3D2B0A;--muted:#7A6540;
+  --surface:#FFFDF7;--border:#D4B97A;--green:#1A7A3D;--green-bg:#D4F0DF;--gold-bg:#FDF6E3;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh}
 
@@ -20,177 +20,323 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink)
 .header-logo{width:40px;height:40px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink);font-weight:800}
 .header-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:white}
 
-.tabs{display:flex;background:var(--ink2);padding:0 1rem;border-bottom:2px solid var(--gold)}
-.tab{padding:1rem;font-family:'Syne',sans-serif;font-weight:600;font-size:13px;color:#8A7A5A;cursor:pointer;display:flex;align-items:center;gap:6px}
+.tabs{display:flex;background:var(--ink2);padding:0 0.5rem;border-bottom:2px solid var(--gold)}
+.tab{padding:1rem 0.75rem;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;color:#8A7A5A;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .tab.active{color:var(--gold);border-bottom:3px solid var(--gold)}
 
 .content{padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
-.panel{display:none}
-.panel.active{display:block}
+.panel{display:none}.panel.active{display:block}
 
 .card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center}
-input, select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin:10px 0 20px;font-family:inherit}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%;transition:0.2s}
+input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin:10px 0 20px;font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%;transition:.2s}
 .btn-gold{background:var(--gold);color:var(--ink)}
 
-#reader { width: 100% !important; border-radius: 12px; overflow: hidden; background: #000; }
+#reader{width:100%!important;border-radius:12px;overflow:hidden;background:#000}
 
-/* Counter Styling */
-.scan-counter-badge {
-    background: var(--gold);
-    color: var(--ink);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 800;
-    font-size: 14px;
-    display: inline-block;
-    margin-bottom: 10px;
+/* Cooldown overlay */
+.scanner-wrap{position:relative;border-radius:12px;overflow:hidden}
+.cooldown-overlay{
+  position:absolute;inset:0;border-radius:12px;
+  background:rgba(26,18,9,.72);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  z-index:10;opacity:0;pointer-events:none;transition:opacity .3s;
 }
+.cooldown-overlay.on{opacity:1;pointer-events:all}
+.spin-ring{
+  width:58px;height:58px;border-radius:50%;
+  border:5px solid rgba(255,255,255,.18);
+  border-top-color:var(--gold);
+  animation:spin 1s linear infinite;
+}
+.cooldown-label{color:var(--gold-light);font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* Result Message Styles */
-.scan-result { padding: 1.5rem; border-radius: 12px; margin-top: 15px; display: none; text-align: center; border: 2px solid transparent; }
-.res-normal { background: var(--green-bg); border-color: var(--green); color: var(--green); }
-.res-vip { background: var(--gold-bg); border-color: var(--gold); color: var(--ink2); }
-.res-dinner { background: #F5D78E; border-color: #C9921A; color: #3D2B0A; box-shadow: 0 4px 15px rgba(201, 146, 26, 0.2); }
-.dot-sep::before { content: " • "; font-weight: 800; }
+.scan-badge{background:var(--gold);color:var(--ink);padding:4px 14px;border-radius:20px;font-weight:800;font-size:14px;display:inline-block;margin-bottom:10px}
+
+/* Modal */
+.overlay{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(26,18,9,.8);backdrop-filter:blur(5px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.overlay.show{opacity:1;pointer-events:all}
+.modal{
+  background:var(--surface);border-radius:22px;border:2px solid var(--border);
+  padding:2rem 1.5rem 1.5rem;width:min(92vw,360px);text-align:center;
+  transform:translateY(28px) scale(.94);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 24px 70px rgba(26,18,9,.35);
+}
+.overlay.show .modal{transform:translateY(0) scale(1)}
+
+.m-emoji{font-size:58px;line-height:1;margin-bottom:6px}
+.m-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--ink);margin-bottom:8px}
+.m-badge{display:inline-block;padding:5px 18px;border-radius:30px;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.badge-n{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green)}
+.badge-v{background:var(--gold-bg);color:var(--ink2);border:1.5px solid var(--gold)}
+.badge-d{background:#F5D78E;color:#3D2B0A;border:1.5px solid #C9921A}
+.m-time{font-size:12px;color:var(--muted);margin-bottom:1.4rem}
+
+.btn-ok{
+  background:var(--green);color:white;border:none;border-radius:11px;
+  width:100%;padding:.9rem;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .2s;
+}
+.btn-ok:hover{filter:brightness(1.15)}
+.btn-ok.gold-ok{background:var(--gold);color:var(--ink)}
+.btn-skip{
+  background:none;border:none;width:100%;margin-top:10px;
+  padding:.5rem;font-size:13px;color:var(--muted);cursor:pointer;
+}
+.btn-skip:hover{color:var(--ink)}
+
+/* Guest list */
+.gl-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.gl-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem}
+.gl-meta{font-size:12px;color:var(--muted)}
+.btn-clr{background:none;border:1.5px solid #ddd;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:5px}
+.btn-clr:hover{border-color:#e44;color:#c33}
+
+.gl-section{margin-bottom:1.2rem}
+.gl-head{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:8px 14px;border-radius:10px 10px 0 0;
+}
+.gl-head.sp{background:var(--gold-bg);color:var(--ink2);border:1.5px solid var(--gold);border-bottom:none}
+.gl-head.nm{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green);border-bottom:none}
+.gl-cnt{margin-left:auto;border-radius:10px;padding:2px 9px;font-size:11px}
+.gl-head.sp .gl-cnt{background:var(--gold);color:var(--ink)}
+.gl-head.nm .gl-cnt{background:var(--green);color:white}
+
+.gl-body{border-radius:0 0 10px 10px;overflow:hidden;border:1.5px solid var(--border);border-top:none}
+.gl-empty{padding:1rem;text-align:center;font-size:13px;color:var(--muted);background:white}
+.gl-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;background:white;border-bottom:1px solid #f0e8d6;
+  animation:slIn .3s ease;
+}
+.gl-row:last-child{border-bottom:none}
+@keyframes slIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1}}
+
+.gl-num{width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gl-num.g{background:var(--gold);color:var(--ink)}
+.gl-num.n{background:var(--green);color:white}
+.gl-info{flex:1;min-width:0}
+.gl-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gl-type{font-size:11px;color:var(--muted)}
+.gl-time{font-size:11px;color:var(--muted);white-space:nowrap}
 </style>
 </head>
 <body>
 
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="m-emoji" id="m-emoji"></div>
+    <div class="m-name"  id="m-name"></div>
+    <div class="m-badge" id="m-badge"></div>
+    <div class="m-time"  id="m-time"></div>
+    <button class="btn-ok" id="m-ok" onclick="confirmScan()">
+      <i class="ti ti-check"></i> Confirm Entry
+    </button>
+    <button class="btn-skip" onclick="dismissScan()">Not now</button>
+  </div>
+</div>
+
 <div class="header">
-    <div class="header-logo">QR</div>
-    <div class="header-title">SOMALILAND NIGHT</div>
+  <div class="header-logo">QR</div>
+  <div class="header-title">SOMALILAND NIGHT</div>
 </div>
 
 <div class="tabs">
-    <div class="tab active" onclick="switchTab('generate')"><i class="ti ti-qrcode"></i> 1. Create QR</div>
-    <div class="tab" onclick="switchTab('scanner')"><i class="ti ti-scan"></i> 2. Scan QR</div>
+  <div class="tab active" onclick="switchTab('generate',this)"><i class="ti ti-qrcode"></i> Create QR</div>
+  <div class="tab"        onclick="switchTab('scanner',this)"><i class="ti ti-scan"></i> Scan</div>
+  <div class="tab"        onclick="switchTab('guestlist',this)"><i class="ti ti-list"></i> Guests</div>
 </div>
 
 <div class="content">
-    <div class="panel active" id="panel-generate">
-        <div class="card">
-            <h3 style="font-family:Syne;margin-bottom:15px">Create New Ticket</h3>
-            <label>Attendee Name</label>
-            <input type="text" id="f-name" placeholder="Enter Full Name">
-            
-            <label>Ticket Class</label>
-            <select id="f-type">
-                <option value="Normal Guest">Normal Guest</option>
-                <option value="VIP">VIP</option>
-                <option value="VIP WITH DINNER">VIP WITH DINNER</option>
-            </select>
-            
-            <button class="btn btn-gold" onclick="generateQR()">Generate Ticket</button>
-        </div>
 
-        <div class="card" id="qr-output" style="display:none">
-            <div id="qr-canvas" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
-            <h2 id="t-name"></h2>
-            <p id="t-type" style="font-weight:700"></p>
+  <!-- CREATE QR -->
+  <div class="panel active" id="panel-generate">
+    <div class="card">
+      <h3 style="font-family:Syne;margin-bottom:15px">Create New Ticket</h3>
+      <label>Attendee Name</label>
+      <input type="text" id="f-name" placeholder="Enter Full Name">
+      <label>Ticket Class</label>
+      <select id="f-type">
+        <option value="Normal Guest">Normal Guest</option>
+        <option value="VIP">VIP</option>
+        <option value="VIP WITH DINNER">VIP WITH DINNER</option>
+      </select>
+      <button class="btn btn-gold" onclick="generateQR()">Generate Ticket</button>
+    </div>
+    <div class="card" id="qr-output" style="display:none">
+      <div id="qr-canvas" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
+      <h2 id="t-name"></h2>
+      <p  id="t-type" style="font-weight:700"></p>
+    </div>
+  </div>
+
+  <!-- SCANNER -->
+  <div class="panel" id="panel-scanner">
+    <div style="text-align:center">
+      <div class="scan-badge">Total Scanned: <span id="scan-count">0</span></div>
+    </div>
+    <div class="card" style="padding:10px;background:#000">
+      <div class="scanner-wrap">
+        <div id="reader"></div>
+        <div class="cooldown-overlay" id="cooldown">
+          <div class="spin-ring"></div>
+          <div class="cooldown-label">Processing…</div>
         </div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:-0.5rem">Point camera at ticket QR code</p>
+  </div>
+
+  <!-- GUEST LIST -->
+  <div class="panel" id="panel-guestlist">
+    <div class="gl-header-row">
+      <div>
+        <div class="gl-title">Guest List</div>
+        <div class="gl-meta" id="gl-meta">0 checked in</div>
+      </div>
+      <button class="btn-clr" onclick="clearList()"><i class="ti ti-trash"></i> Clear All</button>
     </div>
 
-    <div class="panel" id="panel-scanner">
-        <div style="text-align: center;">
-            <div class="scan-counter-badge">
-                Total Scanned: <span id="scan-count-display">0</span>
-            </div>
-        </div>
-        <div class="card" style="padding:10px; background:#000">
-            <div id="reader"></div>
-        </div>
-        
-        <div id="scan-result" class="scan-result">
-            <i id="res-icon" class="ti" style="font-size:40px"></i>
-            <h2 id="res-name" style="font-family:Syne;margin:10px 0 5px"></h2>
-            <p id="res-type" style="text-transform:uppercase;letter-spacing:1px;font-size:13px; font-weight:bold"></p>
-        </div>
+    <div class="gl-section">
+      <div class="gl-head sp"><i class="ti ti-star-filled"></i> VIP &amp; Special Guests<span class="gl-cnt" id="cnt-vip">0</span></div>
+      <div class="gl-body" id="list-vip"><div class="gl-empty">No VIP guests yet</div></div>
     </div>
+
+    <div class="gl-section">
+      <div class="gl-head nm"><i class="ti ti-users"></i> Normal Guests<span class="gl-cnt" id="cnt-nm">0</span></div>
+      <div class="gl-body" id="list-nm"><div class="gl-empty">No normal guests yet</div></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-let html5QrCode = null;
-// Initialize scan counter from localStorage
-let totalScans = parseInt(localStorage.getItem('sl_total_scans') || '0');
+let scanner = null, cooling = false, pending = null;
+let total = parseInt(localStorage.getItem('sl_scans') || '0');
+let log   = JSON.parse(localStorage.getItem('sl_log')  || '[]');
 
-function updateScanDisplay() {
-    document.getElementById('scan-count-display').textContent = totalScans;
-}
+document.getElementById('scan-count').textContent = total;
 
-function switchTab(id) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    if(event) event.currentTarget.classList.add('active');
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + id).classList.add('active');
-    
-    if(id === 'scanner') {
-        updateScanDisplay();
-        startScanner();
-    }
-    else if(html5QrCode) html5QrCode.stop();
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if (id==='scanner') { document.getElementById('scan-count').textContent=total; startScanner(); }
+  else stopScanner();
+  if (id==='guestlist') renderList();
 }
 
 function generateQR() {
-    const name = document.getElementById('f-name').value.trim();
-    const type = document.getElementById('f-type').value;
-    if(!name) return alert("Enter name");
-
-    const qrData = JSON.stringify({ n: name, t: type });
-    document.getElementById('qr-output').style.display = 'block';
-    document.getElementById('t-name').textContent = name;
-    document.getElementById('t-type').textContent = type;
-    
-    const canvas = document.getElementById('qr-canvas');
-    canvas.innerHTML = "";
-    new QRCode(canvas, { text: qrData, width: 200, height: 200 });
+  const name = document.getElementById('f-name').value.trim();
+  const type = document.getElementById('f-type').value;
+  if (!name) return alert('Enter a name');
+  document.getElementById('qr-output').style.display='block';
+  document.getElementById('t-name').textContent=name;
+  document.getElementById('t-type').textContent=type;
+  const c=document.getElementById('qr-canvas');
+  c.innerHTML='';
+  new QRCode(c,{text:JSON.stringify({n:name,t:type}),width:200,height:200});
 }
 
 function startScanner() {
-    html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
-        try {
-            const data = JSON.parse(decodedText);
-            showResult(data);
-            
-            // Increment Scan Counter
-            totalScans++;
-            localStorage.setItem('sl_total_scans', totalScans);
-            updateScanDisplay();
-
-            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
-        } catch(e) { alert("Invalid Ticket"); }
-    });
+  if (scanner) return;
+  scanner = new Html5Qrcode('reader');
+  scanner.start({facingMode:'environment'},{fps:10,qrbox:250},txt=>{
+    if (cooling) return;
+    try { onDetect(JSON.parse(txt)); } catch(e){ alert('Invalid QR'); }
+  });
 }
 
-function showResult(data) {
-    const res = document.getElementById('scan-result');
-    const typeEl = document.getElementById('res-type');
-    const icon = document.getElementById('res-icon');
-    
-    res.style.display = 'block';
-    res.className = 'scan-result'; 
-    typeEl.className = ''; 
-    
-    document.getElementById('res-name').textContent = data.n;
-    
-    if (data.t === "VIP WITH DINNER") {
-        res.classList.add('res-dinner');
-        typeEl.innerHTML = `VIP <span class="dot-sep">DINNER INCLUDED</span>`;
-        icon.className = 'ti ti-Tools-kitchen-2';
-    } else if (data.t === "VIP") {
-        res.classList.add('res-vip');
-        typeEl.textContent = "VIP GUEST";
-        icon.className = 'ti ti-star';
-    } else {
-        res.classList.add('res-normal');
-        typeEl.textContent = "NORMAL GUEST";
-        icon.className = 'ti ti-user-check';
-    }
+function stopScanner() {
+  if (scanner){ scanner.stop().catch(()=>{}); scanner=null; }
 }
 
-// Initial display update
-updateScanDisplay();
+function onDetect(data) {
+  cooling=true; pending=data;
+  document.getElementById('cooldown').classList.add('on');
+  try{ new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); }catch(e){}
+  // 1-second pause, then show popup
+  setTimeout(()=>openModal(data), 1000);
+}
+
+function openModal(data) {
+  const isd = data.t==='VIP WITH DINNER';
+  const isv = data.t==='VIP';
+  document.getElementById('m-emoji').textContent = isd?'🍽️': isv?'⭐':'✅';
+  document.getElementById('m-name').textContent  = data.n;
+  document.getElementById('m-time').textContent  = 'Scanned at '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const b=document.getElementById('m-badge');
+  b.className='m-badge '+(isd?'badge-d':isv?'badge-v':'badge-n');
+  b.textContent = isd?'VIP · Dinner Included': isv?'VIP Guest':'Normal Guest';
+  const ok=document.getElementById('m-ok');
+  ok.className='btn-ok'+(isv||isd?' gold-ok':'');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function confirmScan() {
+  if (!pending) return;
+  total++;
+  localStorage.setItem('sl_scans',total);
+  document.getElementById('scan-count').textContent=total;
+  log.push({n:pending.n,t:pending.t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+  localStorage.setItem('sl_log',JSON.stringify(log));
+  closeModal();
+}
+
+function dismissScan() { closeModal(); }
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('show');
+  setTimeout(()=>{
+    document.getElementById('cooldown').classList.remove('on');
+    cooling=false; pending=null;
+  },2000);
+}
+
+document.getElementById('overlay').addEventListener('click',function(e){
+  if(e.target===this) dismissScan();
+});
+
+function renderList() {
+  const vips = log.filter(g=>g.t!=='Normal Guest');
+  const nrms = log.filter(g=>g.t==='Normal Guest');
+  document.getElementById('cnt-vip').textContent = vips.length;
+  document.getElementById('cnt-nm').textContent  = nrms.length;
+  document.getElementById('gl-meta').textContent = log.length+' checked in';
+  renderSection('list-vip', vips, true);
+  renderSection('list-nm',  nrms, false);
+}
+
+function renderSection(id, list, isVip) {
+  const el=document.getElementById(id);
+  if (!list.length){ el.innerHTML=`<div class="gl-empty">${isVip?'No VIP guests yet':'No normal guests yet'}</div>`; return; }
+  el.innerHTML=list.map((g,i)=>`
+    <div class="gl-row">
+      <div class="gl-num ${isVip?'g':'n'}">${i+1}</div>
+      <div class="gl-info"><div class="gl-name">${g.n}</div><div class="gl-type">${g.t}</div></div>
+      <div class="gl-time">${g.time}</div>
+    </div>`).join('');
+}
+
+function clearList() {
+  if(!confirm('Clear the entire guest log?')) return;
+  log=[]; total=0;
+  localStorage.removeItem('sl_log');
+  localStorage.setItem('sl_scans','0');
+  document.getElementById('scan-count').textContent=0;
+  renderList();
+}
 </script>
 </body>
 </html>
