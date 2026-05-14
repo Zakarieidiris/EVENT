@@ -371,8 +371,7 @@ body::before{
 
 <div class="screen">
 
-  <!-- CREATE -->
-  <div class="panel active" id="panel-generate">
+  <div class="panel" id="panel-generate">
     <div class="sec-label">New Ticket</div>
 
     <div class="form-group">
@@ -408,8 +407,7 @@ body::before{
     </div>
   </div>
 
-  <!-- SCANNER -->
-  <div class="panel" id="panel-scanner">
+  <div class="panel active" id="panel-scanner">
     <div class="scan-stats">
       <div class="stat-box">
         <div class="stat-num" id="stat-total">0</div>
@@ -438,7 +436,6 @@ body::before{
     <p style="text-align:center;font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:-4px">Point camera at ticket QR</p>
   </div>
 
-  <!-- GUESTS -->
   <div class="panel" id="panel-guestlist">
     <div class="gl-top">
       <div>
@@ -466,7 +463,6 @@ body::before{
     </div>
   </div>
 
-  <!-- SETTINGS -->
   <div class="panel" id="panel-settings">
     <div class="sec-label">Preferences</div>
     <div class="s-section">
@@ -505,13 +501,12 @@ body::before{
 
 </div>
 
-<!-- BOTTOM NAV -->
 <nav class="nav">
-   <button class="nav-btn" onclick="switchTab('scanner',this)">
+   <button class="nav-btn active" onclick="switchTab('scanner',this)">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
     <div class="nav-label">Scan</div>
   </button>
-  <button class="nav-btn active" onclick="switchTab('generate',this)">
+  <button class="nav-btn" onclick="switchTab('generate',this)">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="2" height="2"/><rect x="19" y="19" width="2" height="2"/></svg>
     <div class="nav-label">Create</div>
   </button>
@@ -525,7 +520,6 @@ body::before{
   </button>
 </nav>
 
-<!-- SCAN MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal nm" id="modal">
     <div class="m-pill"></div>
@@ -592,6 +586,7 @@ document.getElementById('stat-total').textContent=total;
 document.getElementById('stat-vip').textContent=log.filter(g=>g.t!=='Normal Guest').length;
 document.getElementById('vib-toggle').checked=vibOn;
 updateVibUI();
+startScanner(); // Auto-start on load
 
 // Type picker
 let selTypeVal='Normal Guest';
