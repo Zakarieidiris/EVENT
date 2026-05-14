@@ -298,34 +298,47 @@ input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;m
 let scanner = null, cooling = false, pending = null;
 let total = parseInt(localStorage.getItem('sl_scans') || '0');
 let log   = JSON.parse(localStorage.getItem('sl_log')  || '[]');
-// Default haptic ON (only false if explicitly saved as 'false')
 let vibOn = localStorage.getItem('sl_vib') !== 'false';
 
-// AudioContext beep — works on iOS/Android without external URL
+// Shared AudioContext — created + unlocked on first user gesture
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+// Unlock on very first touch/click so beep works on iOS/Android
+document.addEventListener('touchstart', ()=>{ try{ getAudioCtx(); }catch(e){} }, {once:true});
+document.addEventListener('click',      ()=>{ try{ getAudioCtx(); }catch(e){} }, {once:true});
+
 function playBeep(type) {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
+    const ctx  = getAudioCtx();
+    const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
     if (type === 'vip') {
-      // Two-tone chime for VIP
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.frequency.setValueAtTime(880,  ctx.currentTime);
+      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.13);
+      gain.gain.setValueAtTime(0.5, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.35);
+      osc.stop(ctx.currentTime + 0.4);
     } else {
-      // Single clean beep for normal
       osc.frequency.setValueAtTime(880, ctx.currentTime);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.5, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.2);
+      osc.stop(ctx.currentTime + 0.22);
     }
   } catch(e) {}
+}
+
+function buzz(type) {
+  // MUST be called from a real user-gesture (button click) — not a camera callback
+  if (!vibOn || !navigator.vibrate) return;
+  navigator.vibrate(type === 'vip' ? [120, 80, 120] : [150]);
 }
 
 document.getElementById('scan-count').textContent = total;
@@ -400,10 +413,6 @@ function stopScanner() {
 function onDetect(data) {
   cooling=true; pending=data;
   document.getElementById('cooldown').classList.add('on');
-  // Fire haptic + beep immediately on every scan detection
-  const isVip = data.t === 'VIP' || data.t === 'VIP WITH DINNER';
-  buzz(isVip ? 'vip' : 'normal');
-  playBeep(isVip ? 'vip' : 'normal');
   // 1-second pause, then show popup
   setTimeout(()=>openModal(data), 1000);
 }
@@ -439,6 +448,10 @@ function confirmScan() {
   document.getElementById('scan-count').textContent=total;
   log.push({n:pending.n,t:pending.t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
   localStorage.setItem('sl_log',JSON.stringify(log));
+  // Haptic + beep — fired from button tap (real user gesture = works on all browsers)
+  const isVip = pending.t==='VIP' || pending.t==='VIP WITH DINNER';
+  buzz(isVip ? 'vip' : 'normal');
+  playBeep(isVip ? 'vip' : 'normal');
   closeModal();
 }
 
