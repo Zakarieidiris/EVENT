@@ -3,436 +3,265 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Somaliland Night — Entry</title>
+<title>SOMALILAND NIGHT — QR System</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#0d0d0d;
-  --ink2:#3a3a3a;
-  --muted:#888;
-  --faint:#e8e8e8;
-  --bg:#fafaf8;
-  --white:#ffffff;
-  --accent:#0d0d0d;
-  --green:#1a6b3c;
-  --green-l:#eef7f2;
-  --amber:#8a5f0a;
-  --amber-l:#fdf8ee;
-  --red:#8a1a1a;
-  --red-l:#fdf0f0;
+  --gold:#C9921A;--gold-light:#F5D78E;--ink:#1A1209;--ink2:#3D2B0A;--muted:#7A6540;
+  --surface:#FFFDF7;--border:#D4B97A;--green:#1A7A3D;--green-bg:#D4F0DF;--gold-bg:#FDF6E3;
 }
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh}
 
-body{
-  font-family:'DM Mono',monospace;
-  background:var(--bg);
-  color:var(--ink);
-  min-height:100vh;
-  font-size:13px;
-}
+.header{background:var(--ink);padding:1rem 1.5rem;display:flex;align-items:center;gap:12px}
+.header-logo{width:40px;height:40px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink);font-weight:800}
+.header-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:white}
 
-/* ── HEADER ── */
-.hdr{
-  padding:1.5rem 1.5rem 1rem;
-  border-bottom:1px solid var(--faint);
-  display:flex;align-items:baseline;justify-content:space-between;
-}
-.hdr-name{
-  font-family:'Cormorant Garamond',serif;
-  font-size:1.35rem;font-weight:600;
-  letter-spacing:.02em;color:var(--ink);
-}
-.hdr-sub{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.tabs{display:flex;background:var(--ink2);padding:0 0.5rem;border-bottom:2px solid var(--gold)}
+.tab{padding:1rem 0.75rem;font-family:'Syne',sans-serif;font-weight:600;font-size:12px;color:#8A7A5A;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tab.active{color:var(--gold);border-bottom:3px solid var(--gold)}
 
-/* ── TABS ── */
-.tabs{
-  display:flex;border-bottom:1px solid var(--faint);
-  background:var(--white);
-  overflow-x:auto;
-}
-.tabs::-webkit-scrollbar{display:none}
-.tab{
-  padding:.75rem 1.1rem;
-  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);cursor:pointer;white-space:nowrap;
-  border-bottom:1.5px solid transparent;
-  transition:color .15s,border-color .15s;
-  display:flex;align-items:center;gap:6px;
-}
-.tab.active{color:var(--ink);border-bottom-color:var(--ink)}
-.tab i{font-size:14px}
-
-/* ── CONTENT ── */
-.content{padding:1.5rem;max-width:540px;margin:0 auto}
+.content{padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
 .panel{display:none}.panel.active{display:block}
 
-/* ── FORM ── */
-.field{margin-bottom:1.25rem}
-.field label{
-  display:block;font-size:11px;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;
-}
-input,select{
-  width:100%;padding:.7rem .9rem;
-  border:1px solid var(--faint);border-radius:4px;
-  background:var(--white);color:var(--ink);
-  font-family:'DM Mono',monospace;font-size:13px;
-  outline:none;transition:border-color .15s;
-  appearance:none;
-}
-input:focus,select:focus{border-color:#aaa}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.5rem}
+.card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center}
+input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;margin:10px 0 20px;font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0.8rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;border:none;width:100%;transition:.2s}
+.btn-gold{background:var(--gold);color:var(--ink)}
 
-.btn-primary{
-  width:100%;padding:.75rem;
-  background:var(--ink);color:var(--white);
-  border:none;border-radius:4px;
-  font-family:'DM Mono',monospace;font-size:12px;
-  letter-spacing:.08em;text-transform:uppercase;
-  cursor:pointer;transition:opacity .15s;
-}
-.btn-primary:hover{opacity:.85}
+#reader{width:100%!important;border-radius:12px;overflow:hidden;background:#000}
 
-/* ── QR OUTPUT ── */
-.qr-card{
-  margin-top:1.5rem;padding:2rem;
-  border:1px solid var(--faint);border-radius:6px;
-  background:var(--white);text-align:center;
-}
-.qr-card canvas,.qr-card img{border-radius:4px}
-.qr-name{
-  font-family:'Cormorant Garamond',serif;
-  font-size:1.4rem;font-weight:600;
-  margin-top:1rem;color:var(--ink);
-}
-.qr-type{
-  font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--muted);margin-top:.3rem;
-}
-
-/* ── SCANNER ── */
-.scan-counter{
-  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:1rem;
-  display:flex;align-items:center;gap:8px;
-}
-.scan-counter span{
-  font-family:'Cormorant Garamond',serif;
-  font-size:1.6rem;font-weight:500;color:var(--ink);line-height:1;
-}
-.scanner-box{
-  border:1px solid var(--faint);border-radius:6px;
-  overflow:hidden;background:#000;position:relative;
-}
-#reader{width:100%!important}
+/* Cooldown overlay */
+.scanner-wrap{position:relative;border-radius:12px;overflow:hidden}
 .cooldown-overlay{
-  position:absolute;inset:0;
-  background:rgba(13,13,13,.75);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
-  opacity:0;pointer-events:none;transition:opacity .25s;
+  position:absolute;inset:0;border-radius:12px;
+  background:rgba(26,18,9,.72);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  z-index:10;opacity:0;pointer-events:none;transition:opacity .3s;
 }
 .cooldown-overlay.on{opacity:1;pointer-events:all}
 .spin-ring{
-  width:44px;height:44px;border-radius:50%;
-  border:2px solid rgba(255,255,255,.2);
-  border-top-color:rgba(255,255,255,.9);
+  width:58px;height:58px;border-radius:50%;
+  border:5px solid rgba(255,255,255,.18);
+  border-top-color:var(--gold);
   animation:spin 1s linear infinite;
 }
+.cooldown-label{color:var(--gold-light);font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
 @keyframes spin{to{transform:rotate(360deg)}}
-.cooldown-lbl{color:rgba(255,255,255,.6);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-.scan-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:.75rem;letter-spacing:.04em}
 
-/* ── MODAL ── */
+.scan-badge{background:var(--gold);color:var(--ink);padding:4px 14px;border-radius:20px;font-weight:800;font-size:14px;display:inline-block;margin-bottom:10px}
+
+/* Modal */
 .overlay{
-  position:fixed;inset:0;z-index:400;
-  background:rgba(13,13,13,.6);
-  display:flex;align-items:flex-end;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity .2s;
+  position:fixed;inset:0;z-index:300;
+  background:rgba(26,18,9,.8);backdrop-filter:blur(5px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
 }
 .overlay.show{opacity:1;pointer-events:all}
 .modal{
-  background:var(--white);
-  width:min(100vw,480px);
-  border-radius:12px 12px 0 0;
-  padding:2rem 1.5rem 2.5rem;
-  transform:translateY(100%);
-  transition:transform .3s cubic-bezier(.32,1,.36,1);
+  background:var(--surface);border-radius:22px;border:2px solid var(--border);
+  padding:2rem 1.5rem 1.5rem;width:min(92vw,360px);text-align:center;
+  transform:translateY(28px) scale(.94);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 24px 70px rgba(26,18,9,.35);
 }
-.overlay.show .modal{transform:translateY(0)}
-.modal-grip{
-  width:36px;height:3px;border-radius:2px;
-  background:var(--faint);margin:0 auto 1.75rem;
-}
-.modal-tier{
-  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:.4rem;
-}
-.modal-name{
-  font-family:'Cormorant Garamond',serif;
-  font-size:2rem;font-weight:600;color:var(--ink);
-  line-height:1.15;margin-bottom:.5rem;
-}
-.modal-pill{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:4px 10px;border-radius:3px;
-  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-  margin-bottom:.4rem;
-}
-.pill-n{background:var(--green-l);color:var(--green)}
-.pill-v{background:var(--amber-l);color:var(--amber)}
-.pill-d{background:var(--amber-l);color:var(--amber)}
-.modal-time{font-size:11px;color:var(--muted);margin-bottom:1.5rem}
-.modal-actions{display:flex;flex-direction:column;gap:8px}
-.btn-confirm{
-  width:100%;padding:.8rem;border:none;border-radius:4px;
-  font-family:'DM Mono',monospace;font-size:12px;
-  letter-spacing:.08em;text-transform:uppercase;
-  cursor:pointer;transition:opacity .15s;
-  display:flex;align-items:center;justify-content:center;gap:7px;
-}
-.btn-confirm.normal{background:var(--green);color:var(--white)}
-.btn-confirm.vip{background:var(--ink);color:var(--white)}
-.btn-confirm:hover{opacity:.85}
-.btn-dismiss{
-  width:100%;padding:.7rem;background:none;
-  border:1px solid var(--faint);border-radius:4px;
-  font-family:'DM Mono',monospace;font-size:11px;
-  letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);cursor:pointer;transition:border-color .15s;
-}
-.btn-dismiss:hover{border-color:#bbb;color:var(--ink2)}
+.overlay.show .modal{transform:translateY(0) scale(1)}
 
-/* ── GUEST LIST ── */
-.list-header{
-  display:flex;align-items:baseline;justify-content:space-between;
-  margin-bottom:1.5rem;
-}
-.list-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:1.3rem;font-weight:600;
-}
-.list-meta{font-size:11px;color:var(--muted)}
-.btn-ghost{
-  background:none;border:1px solid var(--faint);border-radius:3px;
-  padding:5px 10px;font-family:'DM Mono',monospace;font-size:11px;
-  letter-spacing:.06em;color:var(--muted);cursor:pointer;
-  display:flex;align-items:center;gap:5px;transition:all .15s;
-}
-.btn-ghost:hover{border-color:#bbb;color:var(--red)}
+.m-emoji{font-size:58px;line-height:1;margin-bottom:6px}
+.m-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--ink);margin-bottom:8px}
+.m-badge{display:inline-block;padding:5px 18px;border-radius:30px;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.badge-n{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green)}
+.badge-v{background:var(--gold-bg);color:var(--ink2);border:1.5px solid var(--gold)}
+.badge-d{background:#F5D78E;color:#3D2B0A;border:1.5px solid #C9921A}
+.m-time{font-size:12px;color:var(--muted);margin-bottom:1.4rem}
 
-.section-label{
-  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--muted);padding:.5rem 0;
-  border-bottom:1px solid var(--faint);margin-bottom:.5rem;
-  display:flex;align-items:center;justify-content:space-between;
+.btn-ok{
+  background:var(--green);color:white;border:none;border-radius:11px;
+  width:100%;padding:.9rem;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .2s;
 }
-.section-cnt{
-  font-family:'Cormorant Garamond',serif;
-  font-size:.95rem;font-weight:500;color:var(--ink);
+.btn-ok:hover{filter:brightness(1.15)}
+.btn-ok.gold-ok{background:var(--gold);color:var(--ink)}
+.btn-skip{
+  background:none;border:none;width:100%;margin-top:10px;
+  padding:.5rem;font-size:13px;color:var(--muted);cursor:pointer;
 }
-.gl-section{margin-bottom:1.75rem}
+.btn-skip:hover{color:var(--ink)}
 
-.gl-row{
-  display:flex;align-items:center;
-  padding:.65rem 0;border-bottom:1px solid var(--faint);
-  gap:10px;animation:fadeUp .25s ease;
-}
-.gl-row:last-child{border-bottom:none}
-@keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
-
-.gl-idx{
-  font-size:11px;color:var(--muted);
-  min-width:22px;text-align:right;
-}
-.gl-info{flex:1;min-width:0}
-.gl-n{
-  font-family:'Cormorant Garamond',serif;
-  font-size:1rem;font-weight:500;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.gl-t{font-size:11px;color:var(--muted)}
-.gl-time{font-size:11px;color:var(--muted);white-space:nowrap}
-.gl-dot{
-  width:6px;height:6px;border-radius:50%;flex-shrink:0;
-}
-.dot-vip{background:var(--amber)}
-.dot-nm{background:var(--faint);border:1px solid #ccc}
-.empty-state{
-  padding:2rem 0;text-align:center;
-  font-size:12px;color:var(--muted);letter-spacing:.04em;
-}
-
-/* ── SETTINGS ── */
-.settings-section{
-  border:1px solid var(--faint);border-radius:6px;
-  overflow:hidden;margin-bottom:1.25rem;background:var(--white);
-}
-.settings-label{
-  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--muted);padding:.75rem 1rem .4rem;
-  border-bottom:1px solid var(--faint);background:var(--bg);
-}
-.setting-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.9rem 1rem;border-bottom:1px solid var(--faint);
-}
+/* Settings toggle */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:white;border-bottom:1px solid #f0e8d6}
 .setting-row:last-child{border-bottom:none}
-.s-label{display:flex;flex-direction:column;gap:2px}
-.s-title{font-size:13px;color:var(--ink)}
-.s-desc{font-size:11px;color:var(--muted)}
-.toggle-wrap{position:relative;width:42px;height:22px;flex-shrink:0}
+.setting-label{display:flex;flex-direction:column;gap:3px}
+.setting-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--ink)}
+.setting-desc{font-size:12px;color:var(--muted)}
+.toggle-wrap{position:relative;width:48px;height:26px;flex-shrink:0}
 .toggle-wrap input{opacity:0;width:0;height:0;position:absolute}
 .toggle-track{
-  position:absolute;inset:0;border-radius:11px;
-  background:var(--faint);cursor:pointer;transition:.2s;
+  position:absolute;inset:0;border-radius:13px;
+  background:#D4B97A;cursor:pointer;transition:.25s;
 }
-.toggle-wrap input:checked + .toggle-track{background:var(--ink)}
+.toggle-wrap input:checked + .toggle-track{background:var(--green)}
 .toggle-thumb{
-  position:absolute;top:2px;left:2px;
-  width:18px;height:18px;border-radius:50%;
-  background:var(--white);transition:.2s;pointer-events:none;
-  box-shadow:0 1px 3px rgba(0,0,0,.2);
+  position:absolute;top:3px;left:3px;
+  width:20px;height:20px;border-radius:50%;
+  background:white;transition:.25s;pointer-events:none;
 }
-.toggle-wrap input:checked ~ .toggle-thumb{left:22px}
+.toggle-wrap input:checked ~ .toggle-thumb{left:25px}
+.vib-demo{display:flex;gap:8px;margin-top:1.2rem}
+.vib-demo button{
+  flex:1;padding:.65rem;border-radius:8px;border:1.5px solid var(--border);
+  background:white;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  color:var(--ink2);transition:.15s;
+}
+.vib-demo button:active{transform:scale(.97)}
+.vib-demo button.gold-test{background:var(--gold-bg);border-color:var(--gold);color:var(--ink2)}
+.setting-section-title{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:11px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);padding:.75rem 1.25rem .4rem;
+}
+.gl-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.gl-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem}
+.gl-meta{font-size:12px;color:var(--muted)}
+.btn-clr{background:none;border:1.5px solid #ddd;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:5px}
+.btn-clr:hover{border-color:#e44;color:#c33}
 
-.vib-tests{display:flex;gap:8px;margin-top:1rem}
-.vib-tests button{
-  flex:1;padding:.6rem;
-  border:1px solid var(--faint);border-radius:4px;
-  background:var(--white);font-family:'DM Mono',monospace;font-size:11px;
-  letter-spacing:.06em;text-transform:uppercase;
-  color:var(--ink2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:5px;
-  transition:all .15s;
+.gl-section{margin-bottom:1.2rem}
+.gl-head{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:8px 14px;border-radius:10px 10px 0 0;
 }
-.vib-tests button:hover{border-color:#aaa;background:var(--bg)}
-.settings-note{font-size:11px;color:var(--muted);text-align:center;margin-top:1rem;line-height:1.6}
+.gl-head.sp{background:var(--gold-bg);color:var(--ink2);border:1.5px solid var(--gold);border-bottom:none}
+.gl-head.nm{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green);border-bottom:none}
+.gl-cnt{margin-left:auto;border-radius:10px;padding:2px 9px;font-size:11px}
+.gl-head.sp .gl-cnt{background:var(--gold);color:var(--ink)}
+.gl-head.nm .gl-cnt{background:var(--green);color:white}
+
+.gl-body{border-radius:0 0 10px 10px;overflow:hidden;border:1.5px solid var(--border);border-top:none}
+.gl-empty{padding:1rem;text-align:center;font-size:13px;color:var(--muted);background:white}
+.gl-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;background:white;border-bottom:1px solid #f0e8d6;
+  animation:slIn .3s ease;
+}
+.gl-row:last-child{border-bottom:none}
+@keyframes slIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1}}
+
+.gl-num{width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gl-num.g{background:var(--gold);color:var(--ink)}
+.gl-num.n{background:var(--green);color:white}
+.gl-info{flex:1;min-width:0}
+.gl-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gl-type{font-size:11px;color:var(--muted)}
+.gl-time{font-size:11px;color:var(--muted);white-space:nowrap}
 </style>
 </head>
 <body>
 
-<!-- MODAL (bottom sheet) -->
+<!-- MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="modal-grip"></div>
-    <div class="modal-tier" id="m-tier"></div>
-    <div class="modal-name" id="m-name"></div>
-    <div><span class="modal-pill" id="m-pill"></span></div>
-    <div class="modal-time" id="m-time"></div>
-    <div class="modal-actions">
-      <button class="btn-confirm" id="m-ok" onclick="confirmScan()">
-        <i class="ti ti-check"></i> Confirm entry
-      </button>
-      <button class="btn-dismiss" onclick="dismissScan()">dismiss</button>
-    </div>
+    <div class="m-emoji" id="m-emoji"></div>
+    <div class="m-name"  id="m-name"></div>
+    <div class="m-badge" id="m-badge"></div>
+    <div class="m-time"  id="m-time"></div>
+    <button class="btn-ok" id="m-ok" onclick="confirmScan()">
+      <i class="ti ti-check"></i> Confirm Entry
+    </button>
+    <button class="btn-skip" onclick="dismissScan()">Not now</button>
   </div>
 </div>
 
-<!-- HEADER -->
-<div class="hdr">
-  <div class="hdr-name">Somaliland Night</div>
-  <div class="hdr-sub">Entry System</div>
+<div class="header">
+  <div class="header-logo">QR</div>
+  <div class="header-title">SOMALILAND NIGHT</div>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('generate',this)">
-    <i class="ti ti-qrcode"></i> Create
-  </div>
-  <div class="tab" onclick="switchTab('scanner',this)">
-    <i class="ti ti-scan"></i> Scan
-  </div>
-  <div class="tab" onclick="switchTab('guestlist',this)">
-    <i class="ti ti-list"></i> Guests
-  </div>
-  <div class="tab" onclick="switchTab('settings',this)">
-    <i class="ti ti-settings"></i> Settings
-  </div>
+  <div class="tab active" onclick="switchTab('generate',this)"><i class="ti ti-qrcode"></i> Create QR</div>
+  <div class="tab"        onclick="switchTab('scanner',this)"><i class="ti ti-scan"></i> Scan</div>
+  <div class="tab"        onclick="switchTab('guestlist',this)"><i class="ti ti-list"></i> Guests</div>
+  <div class="tab"        onclick="switchTab('settings',this)"><i class="ti ti-settings"></i> Settings</div>
 </div>
 
-<!-- CONTENT -->
 <div class="content">
 
-  <!-- CREATE -->
+  <!-- CREATE QR -->
   <div class="panel active" id="panel-generate">
-    <div class="field">
-      <label>Attendee name</label>
-      <input type="text" id="f-name" placeholder="Full name">
-    </div>
-    <div class="field">
-      <label>Ticket class</label>
+    <div class="card">
+      <h3 style="font-family:Syne;margin-bottom:15px">Create New Ticket</h3>
+      <label>Attendee Name</label>
+      <input type="text" id="f-name" placeholder="Enter Full Name">
+      <label>Ticket Class</label>
       <select id="f-type">
         <option value="Normal Guest">Normal Guest</option>
         <option value="VIP">VIP</option>
-        <option value="VIP WITH DINNER">VIP with Dinner</option>
+        <option value="VIP WITH DINNER">VIP WITH DINNER</option>
       </select>
+      <button class="btn btn-gold" onclick="generateQR()">Generate Ticket</button>
     </div>
-    <button class="btn-primary" onclick="generateQR()">Generate ticket</button>
-
-    <div class="qr-card" id="qr-output" style="display:none">
-      <div id="qr-canvas" style="display:flex;justify-content:center"></div>
-      <div class="qr-name" id="t-name"></div>
-      <div class="qr-type" id="t-type"></div>
+    <div class="card" id="qr-output" style="display:none">
+      <div id="qr-canvas" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
+      <h2 id="t-name"></h2>
+      <p  id="t-type" style="font-weight:700"></p>
     </div>
   </div>
 
-  <!-- SCAN -->
+  <!-- SCANNER -->
   <div class="panel" id="panel-scanner">
-    <div class="scan-counter">
-      <span id="scan-count">0</span> scanned tonight
+    <div style="text-align:center">
+      <div class="scan-badge">Total Scanned: <span id="scan-count">0</span></div>
     </div>
-    <div class="scanner-box">
-      <div id="reader"></div>
-      <div class="cooldown-overlay" id="cooldown">
-        <div class="spin-ring"></div>
-        <div class="cooldown-lbl">Processing</div>
+    <div class="card" style="padding:10px;background:#000">
+      <div class="scanner-wrap">
+        <div id="reader"></div>
+        <div class="cooldown-overlay" id="cooldown">
+          <div class="spin-ring"></div>
+          <div class="cooldown-label">Processing…</div>
+        </div>
       </div>
     </div>
-    <div class="scan-hint">Point camera at ticket QR code</div>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:-0.5rem">Point camera at ticket QR code</p>
   </div>
 
-  <!-- GUESTS -->
+  <!-- GUEST LIST -->
   <div class="panel" id="panel-guestlist">
-    <div class="list-header">
+    <div class="gl-header-row">
       <div>
-        <div class="list-title">Guest list</div>
-        <div class="list-meta" id="gl-meta">0 checked in</div>
+        <div class="gl-title">Guest List</div>
+        <div class="gl-meta" id="gl-meta">0 checked in</div>
       </div>
-      <button class="btn-ghost" onclick="clearList()">
-        <i class="ti ti-trash" style="font-size:13px"></i> Clear
-      </button>
+      <button class="btn-clr" onclick="clearList()"><i class="ti ti-trash"></i> Clear All</button>
     </div>
 
     <div class="gl-section">
-      <div class="section-label">
-        VIP &amp; Special
-        <span class="section-cnt" id="cnt-vip">0</span>
-      </div>
-      <div id="list-vip"><div class="empty-state">No VIP guests yet</div></div>
+      <div class="gl-head sp"><i class="ti ti-star-filled"></i> VIP &amp; Special Guests<span class="gl-cnt" id="cnt-vip">0</span></div>
+      <div class="gl-body" id="list-vip"><div class="gl-empty">No VIP guests yet</div></div>
     </div>
 
     <div class="gl-section">
-      <div class="section-label">
-        Normal guests
-        <span class="section-cnt" id="cnt-nm">0</span>
-      </div>
-      <div id="list-nm"><div class="empty-state">No normal guests yet</div></div>
+      <div class="gl-head nm"><i class="ti ti-users"></i> Normal Guests<span class="gl-cnt" id="cnt-nm">0</span></div>
+      <div class="gl-body" id="list-nm"><div class="gl-empty">No normal guests yet</div></div>
     </div>
   </div>
 
   <!-- SETTINGS -->
   <div class="panel" id="panel-settings">
+    <div style="font-family:Syne;font-weight:800;font-size:1.05rem;margin-bottom:1rem">Settings</div>
 
-    <div class="settings-section">
-      <div class="settings-label">Haptic feedback</div>
+    <div style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem">
+      <div class="setting-section-title">Haptic feedback</div>
+
       <div class="setting-row">
-        <div class="s-label">
-          <div class="s-title">Vibration on scan</div>
-          <div class="s-desc">Vibrate when a QR is confirmed</div>
+        <div class="setting-label">
+          <div class="setting-title"><i class="ti ti-device-mobile-vibration" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Vibration on scan</div>
+          <div class="setting-desc">Vibrate when a QR is confirmed</div>
         </div>
         <label class="toggle-wrap">
           <input type="checkbox" id="vib-toggle" onchange="saveVibSetting()">
@@ -440,168 +269,179 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
           <div class="toggle-thumb"></div>
         </label>
       </div>
+
       <div class="setting-row" id="vib-pattern-row" style="opacity:.4;pointer-events:none">
-        <div class="s-label">
-          <div class="s-title">VIP double pulse</div>
-          <div class="s-desc">Normal = 1 buzz · VIP &amp; Dinner = 2 buzzes</div>
+        <div class="setting-label">
+          <div class="setting-title">VIP double pulse</div>
+          <div class="setting-desc">Normal = 1 short buzz &nbsp;·&nbsp; VIP &amp; Dinner = 2 buzzes</div>
         </div>
-        <i class="ti ti-check" style="font-size:16px;color:var(--green)"></i>
+        <i class="ti ti-check" style="color:var(--green);font-size:18px"></i>
       </div>
     </div>
 
     <div id="vib-test-wrap" style="display:none">
-      <div class="vib-tests">
-        <button onclick="testVib('normal')">
-          <i class="ti ti-device-mobile-vibration" style="font-size:14px"></i> Normal ×1
-        </button>
-        <button onclick="testVib('vip')">
-          <i class="ti ti-device-mobile-vibration" style="font-size:14px"></i> VIP ×2
-        </button>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;text-align:center">Test vibration patterns</div>
+      <div class="vib-demo">
+        <button onclick="testVib('normal')"><i class="ti ti-device-mobile-vibration"></i> Normal (×1)</button>
+        <button class="gold-test" onclick="testVib('vip')"><i class="ti ti-device-mobile-vibration"></i> VIP (×2)</button>
       </div>
     </div>
 
-    <p class="settings-note">
-      Requires a supported mobile browser.<br>On iOS, silent mode must be off.
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:1.2rem">
+      Requires a supported mobile browser. On iOS, silent mode must be off.
     </p>
   </div>
 
 </div>
 
 <script>
-let scanner=null,cooling=false,pending=null;
-let total=parseInt(localStorage.getItem('sl_scans')||'0');
-let log=JSON.parse(localStorage.getItem('sl_log')||'[]');
-let vibOn=localStorage.getItem('sl_vib')==='true';
+let scanner = null, cooling = false, pending = null;
+let total = parseInt(localStorage.getItem('sl_scans') || '0');
+let log   = JSON.parse(localStorage.getItem('sl_log')  || '[]');
+let vibOn = localStorage.getItem('sl_vib') === 'true';
 
-document.getElementById('scan-count').textContent=total;
+document.getElementById('scan-count').textContent = total;
 
-window.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('vib-toggle').checked=vibOn;
+// Init toggle state on load
+window.addEventListener('DOMContentLoaded', () => {
+  const tog = document.getElementById('vib-toggle');
+  tog.checked = vibOn;
   updateVibUI();
 });
 
-function saveVibSetting(){
-  vibOn=document.getElementById('vib-toggle').checked;
-  localStorage.setItem('sl_vib',vibOn);
+function saveVibSetting() {
+  vibOn = document.getElementById('vib-toggle').checked;
+  localStorage.setItem('sl_vib', vibOn);
   updateVibUI();
 }
-function updateVibUI(){
-  const row=document.getElementById('vib-pattern-row');
-  const wrap=document.getElementById('vib-test-wrap');
-  row.style.opacity=vibOn?'1':'.4';
-  row.style.pointerEvents=vibOn?'all':'none';
-  wrap.style.display=vibOn?'block':'none';
-}
-function buzz(type){
-  if(!vibOn||!navigator.vibrate)return;
-  navigator.vibrate(type==='vip'?[100,80,100]:120);
-}
-function testVib(type){buzz(type);}
 
-function switchTab(id,el){
+function updateVibUI() {
+  const row  = document.getElementById('vib-pattern-row');
+  const wrap = document.getElementById('vib-test-wrap');
+  row.style.opacity        = vibOn ? '1'     : '.4';
+  row.style.pointerEvents  = vibOn ? 'all'   : 'none';
+  wrap.style.display       = vibOn ? 'block' : 'none';
+}
+
+function buzz(type) {
+  if (!vibOn || !navigator.vibrate) return;
+  if (type === 'vip') {
+    navigator.vibrate([100, 80, 100]); // two pulses
+  } else {
+    navigator.vibrate(120); // one short buzz
+  }
+}
+
+function testVib(type) { buzz(type); }
+
+function switchTab(id, el) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  if(id==='scanner'){document.getElementById('scan-count').textContent=total;startScanner();}
+  if (id==='scanner') { document.getElementById('scan-count').textContent=total; startScanner(); }
   else stopScanner();
-  if(id==='guestlist')renderList();
+  if (id==='guestlist') renderList();
 }
 
-function generateQR(){
-  const name=document.getElementById('f-name').value.trim();
-  const type=document.getElementById('f-type').value;
-  if(!name)return alert('Enter a name');
+function generateQR() {
+  const name = document.getElementById('f-name').value.trim();
+  const type = document.getElementById('f-type').value;
+  if (!name) return alert('Enter a name');
   document.getElementById('qr-output').style.display='block';
   document.getElementById('t-name').textContent=name;
   document.getElementById('t-type').textContent=type;
   const c=document.getElementById('qr-canvas');
   c.innerHTML='';
-  new QRCode(c,{text:JSON.stringify({n:name,t:type}),width:180,height:180,colorDark:'#0d0d0d',colorLight:'#ffffff'});
+  new QRCode(c,{text:JSON.stringify({n:name,t:type}),width:200,height:200});
 }
 
-function startScanner(){
-  if(scanner)return;
-  scanner=new Html5Qrcode('reader');
-  scanner.start({facingMode:'environment'},{fps:10,qrbox:220},txt=>{
-    if(cooling)return;
-    try{onDetect(JSON.parse(txt));}catch(e){alert('Invalid QR');}
+function startScanner() {
+  if (scanner) return;
+  scanner = new Html5Qrcode('reader');
+  scanner.start({facingMode:'environment'},{fps:10,qrbox:250},txt=>{
+    if (cooling) return;
+    try { onDetect(JSON.parse(txt)); } catch(e){ alert('Invalid QR'); }
   });
 }
-function stopScanner(){
-  if(scanner){scanner.stop().catch(()=>{});scanner=null;}
+
+function stopScanner() {
+  if (scanner){ scanner.stop().catch(()=>{}); scanner=null; }
 }
 
-function onDetect(data){
-  cooling=true;pending=data;
+function onDetect(data) {
+  cooling=true; pending=data;
   document.getElementById('cooldown').classList.add('on');
-  try{new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();}catch(e){}
-  setTimeout(()=>openModal(data),1000);
+  try{ new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); }catch(e){}
+  // 1-second pause, then show popup
+  setTimeout(()=>openModal(data), 1000);
 }
 
-function openModal(data){
-  const isd=data.t==='VIP WITH DINNER';
-  const isv=data.t==='VIP';
-  document.getElementById('m-tier').textContent=isd?'VIP · Dinner included':isv?'VIP Guest':'General admission';
-  document.getElementById('m-name').textContent=data.n;
-  document.getElementById('m-time').textContent='Scanned at '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  const pill=document.getElementById('m-pill');
-  pill.className='modal-pill '+(isd?'pill-d':isv?'pill-v':'pill-n');
-  pill.textContent=data.t;
+function openModal(data) {
+  const isd = data.t==='VIP WITH DINNER';
+  const isv = data.t==='VIP';
+  document.getElementById('m-emoji').textContent = isd?'🍽️': isv?'⭐':'✅';
+  document.getElementById('m-name').textContent  = data.n;
+  document.getElementById('m-time').textContent  = 'Scanned at '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const b=document.getElementById('m-badge');
+  b.className='m-badge '+(isd?'badge-d':isv?'badge-v':'badge-n');
+  b.textContent = isd?'VIP · Dinner Included': isv?'VIP Guest':'Normal Guest';
   const ok=document.getElementById('m-ok');
-  ok.className='btn-confirm '+(isv||isd?'vip':'normal');
+  ok.className='btn-ok'+(isv||isd?' gold-ok':'');
   document.getElementById('overlay').classList.add('show');
 }
 
-function confirmScan(){
-  if(!pending)return;
+function confirmScan() {
+  if (!pending) return;
   total++;
   localStorage.setItem('sl_scans',total);
   document.getElementById('scan-count').textContent=total;
   log.push({n:pending.n,t:pending.t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
   localStorage.setItem('sl_log',JSON.stringify(log));
-  const isVip=pending.t==='VIP'||pending.t==='VIP WITH DINNER';
-  buzz(isVip?'vip':'normal');
+  // Haptic feedback — 1 pulse normal, 2 pulses VIP
+  const isVip = pending.t==='VIP' || pending.t==='VIP WITH DINNER';
+  buzz(isVip ? 'vip' : 'normal');
   closeModal();
 }
-function dismissScan(){closeModal();}
-function closeModal(){
+
+function dismissScan() { closeModal(); }
+
+function closeModal() {
   document.getElementById('overlay').classList.remove('show');
   setTimeout(()=>{
     document.getElementById('cooldown').classList.remove('on');
-    cooling=false;pending=null;
+    cooling=false; pending=null;
   },2000);
 }
+
 document.getElementById('overlay').addEventListener('click',function(e){
-  if(e.target===this)dismissScan();
+  if(e.target===this) dismissScan();
 });
 
-function renderList(){
-  const vips=log.filter(g=>g.t!=='Normal Guest');
-  const nrms=log.filter(g=>g.t==='Normal Guest');
-  document.getElementById('cnt-vip').textContent=vips.length;
-  document.getElementById('cnt-nm').textContent=nrms.length;
-  document.getElementById('gl-meta').textContent=log.length+' checked in';
-  renderSection('list-vip',vips,true);
-  renderSection('list-nm',nrms,false);
+function renderList() {
+  const vips = log.filter(g=>g.t!=='Normal Guest');
+  const nrms = log.filter(g=>g.t==='Normal Guest');
+  document.getElementById('cnt-vip').textContent = vips.length;
+  document.getElementById('cnt-nm').textContent  = nrms.length;
+  document.getElementById('gl-meta').textContent = log.length+' checked in';
+  renderSection('list-vip', vips, true);
+  renderSection('list-nm',  nrms, false);
 }
-function renderSection(id,list,isVip){
+
+function renderSection(id, list, isVip) {
   const el=document.getElementById(id);
-  if(!list.length){el.innerHTML=`<div class="empty-state">${isVip?'No VIP guests yet':'No normal guests yet'}</div>`;return;}
+  if (!list.length){ el.innerHTML=`<div class="gl-empty">${isVip?'No VIP guests yet':'No normal guests yet'}</div>`; return; }
   el.innerHTML=list.map((g,i)=>`
     <div class="gl-row">
-      <div class="gl-idx">${i+1}</div>
-      <div class="gl-dot ${isVip?'dot-vip':'dot-nm'}"></div>
-      <div class="gl-info">
-        <div class="gl-n">${g.n}</div>
-        <div class="gl-t">${g.t}</div>
-      </div>
+      <div class="gl-num ${isVip?'g':'n'}">${i+1}</div>
+      <div class="gl-info"><div class="gl-name">${g.n}</div><div class="gl-type">${g.t}</div></div>
       <div class="gl-time">${g.time}</div>
     </div>`).join('');
 }
-function clearList(){
-  if(!confirm('Clear the entire guest log?'))return;
-  log=[];total=0;
+
+function clearList() {
+  if(!confirm('Clear the entire guest log?')) return;
+  log=[]; total=0;
   localStorage.removeItem('sl_log');
   localStorage.setItem('sl_scans','0');
   document.getElementById('scan-count').textContent=0;
