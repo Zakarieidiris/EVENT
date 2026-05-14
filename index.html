@@ -41,6 +41,14 @@ body::before{
   box-shadow:0 1px 0 var(--border);
 }
 .hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-emblem{
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid var(--gold2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;
+  color:var(--gold2);letter-spacing:.5px;
+  background:var(--gold-bg);
+}
 .hdr-name{
   font-family:'Barlow Condensed',sans-serif;font-weight:700;
   font-size:15px;letter-spacing:3px;text-transform:uppercase;color:var(--ink);
@@ -102,8 +110,9 @@ body::before{
   outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
 }
 .form-input::placeholder{color:var(--text3)}
+.form-input:focus{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(169,114,10,.1)}
 
-/* TICKET TYPE PILLS */
+/* TICKET TYPE */
 .type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
 .type-pill{
   padding:12px 4px 10px;border-radius:12px;border:1.5px solid var(--border);
@@ -119,14 +128,35 @@ body::before{
   background:linear-gradient(135deg,#8A5E08,#C9921A,#8A5E08);background-size:200% 100%;
   font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;
   letter-spacing:3px;text-transform:uppercase;color:white;
+  transition:background-position .4s,transform .15s,box-shadow .2s;
   box-shadow:0 4px 18px rgba(169,114,10,.3);
 }
+.btn-gen:active{transform:scale(.98)}
 
-/* SCANNER UI */
+/* QR CARD */
+.qr-card{
+  background:var(--white);border:1.5px solid var(--border);border-radius:16px;
+  padding:24px 20px 20px;text-align:center;margin-top:20px;
+  position:relative;overflow:hidden;
+  box-shadow:0 4px 24px rgba(28,20,9,.08);
+}
+.qr-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));
+}
+.qr-card-type{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.qr-card-type.vip{color:var(--gold)}
+.qr-card-type.normal{color:var(--green)}
+#qr-canvas{display:flex;justify-content:center;margin-bottom:14px}
+.qr-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--ink)}
+.qr-sub{font-size:10px;color:var(--text2);margin-top:5px;letter-spacing:1px;text-transform:uppercase}
+
+/* SCANNER */
 .scan-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .stat-box{
   background:var(--white);border:1.5px solid var(--border);border-radius:12px;
   padding:14px;text-align:center;
+  box-shadow:0 2px 8px rgba(28,20,9,.05);
 }
 .stat-num{
   font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;
@@ -137,15 +167,25 @@ body::before{
 .scanner-wrap{
   border-radius:16px;overflow:hidden;border:1.5px solid var(--border2);
   background:#000;position:relative;margin-bottom:14px;
+  box-shadow:0 4px 20px rgba(28,20,9,.12);
 }
 #reader{width:100%!important}
+
+.scan-corners{position:absolute;inset:0;pointer-events:none;z-index:5}
+.sc{position:absolute;width:28px;height:28px}
+.sc svg{width:100%;height:100%}
+.sc.tl{top:14px;left:14px}
+.sc.tr{top:14px;right:14px;transform:scaleX(-1)}
+.sc.bl{bottom:14px;left:14px;transform:scaleY(-1)}
+.sc.br{bottom:14px;right:14px;transform:scale(-1)}
+
 .scan-beam{
   position:absolute;left:14px;right:14px;height:1.5px;
   background:linear-gradient(90deg,transparent,var(--gold2) 30%,#F5D78E 50%,var(--gold2) 70%,transparent);
-  box-shadow:0 0-10px var(--gold2);
+  box-shadow:0 0 10px var(--gold2),0 0 20px rgba(201,146,26,.4);
   animation:beam 2.8s ease-in-out infinite;z-index:6;
 }
-@keyframes beam{0%,100%{top:14px}50%{top:calc(100% - 14px)}}
+@keyframes beam{0%,100%{top:14px;opacity:.7}50%{top:calc(100% - 14px);opacity:1}}
 
 .cooldown-overlay{
   position:absolute;inset:0;z-index:10;
@@ -154,6 +194,16 @@ body::before{
   opacity:0;pointer-events:none;transition:opacity .3s;
 }
 .cooldown-overlay.on{opacity:1;pointer-events:all}
+.c-ring{
+  width:60px;height:60px;border-radius:50%;
+  border:2px solid rgba(201,146,26,.2);border-top-color:var(--gold2);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.c-text{
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;
+  letter-spacing:3px;text-transform:uppercase;color:#F5D78E;font-weight:600;
+}
 
 /* MODAL */
 .overlay{
@@ -166,30 +216,142 @@ body::before{
 .modal{
   width:100%;max-width:480px;border-radius:24px 24px 0 0;
   padding-bottom:calc(env(safe-area-inset-bottom) + 20px);
-  transform:translateY(100%);transition:transform .38s cubic-bezier(.32,1.1,.64,1);
-  background:white;
+  transform:translateY(100%);overflow:hidden;
+  transition:transform .38s cubic-bezier(.32,1.1,.64,1);
+  box-shadow:0 -8px 40px rgba(28,20,9,.15);
 }
 .overlay.show .modal{transform:translateY(0)}
-.m-hero{padding:22px 20px 16px;text-align:center}
-.m-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;margin-bottom:6px}
+.modal.nm{background:var(--white);border:1.5px solid var(--border);border-bottom:none}
+.modal.vp{background:var(--gold-bg);border:1.5px solid #D4B870;border-bottom:none}
+
+.m-pill{width:40px;height:4px;border-radius:2px;background:var(--border2);margin:14px auto 0}
+.m-hero{padding:22px 20px 16px;position:relative;overflow:hidden;text-align:center}
+.m-hero-glow-nm{
+  position:absolute;bottom:0;left:10%;right:10%;height:60%;
+  background:radial-gradient(ellipse,rgba(30,122,69,.08),transparent 70%);pointer-events:none;
+}
+.m-hero-glow-vp{
+  position:absolute;bottom:0;left:10%;right:10%;height:60%;
+  background:radial-gradient(ellipse,rgba(201,146,26,.15),transparent 70%);pointer-events:none;
+}
+.m-emoji{font-size:52px;line-height:1;margin-bottom:8px;position:relative;z-index:1}
+.m-name{
+  font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;
+  color:var(--ink);margin-bottom:6px;line-height:1.2;position:relative;z-index:1;
+}
 .m-badge{
-  display:inline-flex;padding:5px 14px;border-radius:20px;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 14px;border-radius:20px;
   font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  position:relative;z-index:1;
 }
 .b-nm{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
 .b-vp{background:#FDE8A0;color:var(--gold);border:1px solid #D4A843}
+.b-dn{background:#FDE090;color:var(--gold);border:1px solid #C9921A}
+.m-time{font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:8px;position:relative;z-index:1}
 
+.m-div{height:1.5px;background:var(--border);margin:0 20px 18px}
+
+.m-btns{padding:0 16px}
 .btn-confirm{
-  width:90%;margin:10px auto;padding:17px;border-radius:14px;border:none;
+  width:100%;padding:17px;border-radius:14px;border:none;cursor:pointer;
   font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;
-  letter-spacing:3px;text-transform:uppercase;color:white;display:block;
+  letter-spacing:3px;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .15s,filter .2s;
 }
-.c-nm{background:var(--green)}
-.c-vp{background:var(--gold2)}
-.btn-skip{width:100%;padding:11px;border:none;background:none;color:var(--text3);cursor:pointer}
+.btn-confirm:active{transform:scale(.98)}
+.c-nm{background:var(--green);color:white;box-shadow:0 4px 16px rgba(30,122,69,.25)}
+.c-vp{
+  background:linear-gradient(135deg,#8A5E08,#C9921A,#8A5E08);background-size:200% 100%;
+  color:white;box-shadow:0 4px 18px rgba(169,114,10,.3);
+}
+.c-vp:hover{background-position:100% 0}
+.btn-skip{
+  width:100%;padding:11px;margin-top:6px;border:none;background:none;
+  font-size:12px;color:var(--text3);cursor:pointer;letter-spacing:.5px;
+}
+.btn-skip:hover{color:var(--ink2)}
 
 /* GUEST LIST */
-.gl-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);background:white}
+.gl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.gl-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--ink)}
+.gl-meta{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-top:3px}
+.btn-clr{
+  background:none;border:1.5px solid var(--border2);border-radius:8px;
+  padding:7px 12px;font-size:11px;color:var(--text3);cursor:pointer;
+  display:flex;align-items:center;gap:5px;font-family:'Barlow',sans-serif;transition:all .2s;
+}
+.btn-clr:hover{border-color:#C0392B;color:#C0392B}
+
+.gl-sec{margin-bottom:18px}
+.gl-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:10px 10px 0 0;
+}
+.gl-hd.vp{background:var(--gold-bg);border:1.5px solid #D4B870;border-bottom:none}
+.gl-hd.nm{background:var(--green-bg);border:1.5px solid var(--green-border);border-bottom:none}
+.gl-hd-lbl{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:6px;
+}
+.gl-hd.vp .gl-hd-lbl{color:var(--gold)}
+.gl-hd.nm .gl-hd-lbl{color:var(--green)}
+.gl-cnt{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.gl-hd.vp .gl-cnt{background:#F5E4B8;color:var(--gold)}
+.gl-hd.nm .gl-cnt{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+
+.gl-body{border-radius:0 0 10px 10px;overflow:hidden;border:1.5px solid var(--border);border-top:none}
+.gl-empty{padding:20px;text-align:center;font-size:12px;color:var(--text3);background:var(--white)}
+.gl-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--white);border-bottom:1px solid var(--border);
+  animation:rowIn .25s ease both;
+}
+.gl-row:last-child{border-bottom:none}
+@keyframes rowIn{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+.gl-num{
+  width:26px;height:26px;border-radius:50%;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.gl-num.g{background:var(--gold-bg);color:var(--gold);border:1.5px solid #D4B870}
+.gl-num.n{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green-border)}
+.gl-info{flex:1;min-width:0}
+.gl-rname{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.gl-rtype{font-size:10px;color:var(--text3);margin-top:2px}
+.gl-rtime{font-size:10px;color:var(--text3);white-space:nowrap}
+
+/* SETTINGS */
+.s-section{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(28,20,9,.04)}
+.s-title{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:700;
+  color:var(--text3);padding:12px 16px 8px;border-bottom:1px solid var(--border);
+  background:var(--card2);
+}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+.s-row:last-child{border-bottom:none}
+.s-info .s-name{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.s-info .s-desc{font-size:11px;color:var(--text3);line-height:1.4}
+.toggle-wrap{position:relative;width:46px;height:24px;flex-shrink:0}
+.toggle-wrap input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;border-radius:12px;background:var(--border2);cursor:pointer;transition:.25s}
+.toggle-wrap input:checked + .toggle-track{background:var(--green)}
+.toggle-thumb{
+  position:absolute;top:3px;left:3px;width:18px;height:18px;
+  border-radius:50%;background:white;transition:.25s;pointer-events:none;
+  box-shadow:0 1px 4px rgba(0,0,0,.2);
+}
+.toggle-wrap input:checked ~ .toggle-thumb{left:25px}
+.test-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px;background:var(--card2)}
+.test-btn{
+  padding:10px;border-radius:10px;border:1.5px solid var(--border2);
+  background:var(--white);font-family:'Barlow',sans-serif;font-weight:600;font-size:12px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  color:var(--ink2);transition:.15s;
+}
+.test-btn:active{transform:scale(.97)}
+.test-btn.gold{background:var(--gold-bg);border-color:#D4B870;color:var(--gold)}
+.s-note{font-size:11px;color:var(--text3);text-align:center;padding:8px 16px 10px;line-height:1.6;background:var(--card2);border-top:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -208,6 +370,43 @@ body::before{
 </header>
 
 <div class="screen">
+
+  <div class="panel" id="panel-generate">
+    <div class="sec-label">New Ticket</div>
+
+    <div class="form-group">
+      <label class="form-label">Attendee Name</label>
+      <input class="form-input" type="text" id="f-name" placeholder="Full name…" autocomplete="off">
+    </div>
+
+    <label class="form-label">Ticket Class</label>
+    <div class="type-grid">
+      <div class="type-pill sel" data-val="Normal Guest" onclick="selType(this)">
+        <div class="type-pill-icon">🎟️</div>
+        <div class="type-pill-name">General</div>
+      </div>
+      <div class="type-pill" data-val="VIP" onclick="selType(this)">
+        <div class="type-pill-icon">⭐</div>
+        <div class="type-pill-name">VIP</div>
+      </div>
+      <div class="type-pill" data-val="VIP WITH DINNER" onclick="selType(this)">
+        <div class="type-pill-icon">🍽️</div>
+        <div class="type-pill-name">VIP+Dinner</div>
+      </div>
+    </div>
+
+    <button class="btn-gen" onclick="generateQR()">Generate Ticket</button>
+
+    <div id="qr-output" style="display:none">
+      <div class="qr-card">
+        <div class="qr-card-type" id="t-type-lbl"></div>
+        <div id="qr-canvas"></div>
+        <div class="qr-name" id="t-name"></div>
+        <div class="qr-sub" id="t-type"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="panel active" id="panel-scanner">
     <div class="scan-stats">
       <div class="stat-box">
@@ -219,181 +418,303 @@ body::before{
         <div class="stat-lbl">VIP Entries</div>
       </div>
     </div>
+
     <div class="scanner-wrap">
       <div id="reader"></div>
-      <div class="scan-beam"></div>
+      <div class="scan-corners">
+        <div class="sc tl"><svg viewBox="0 0 28 28" fill="none"><path d="M0 20V4a4 4 0 014-4h16" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+        <div class="sc tr"><svg viewBox="0 0 28 28" fill="none"><path d="M0 20V4a4 4 0 014-4h16" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+        <div class="sc bl"><svg viewBox="0 0 28 28" fill="none"><path d="M0 20V4a4 4 0 014-4h16" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+        <div class="sc br"><svg viewBox="0 0 28 28" fill="none"><path d="M0 20V4a4 4 0 014-4h16" stroke="#D4A843" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+        <div class="scan-beam"></div>
+      </div>
       <div class="cooldown-overlay" id="cooldown">
-        <div style="color:white;letter-spacing:2px">SCANNING...</div>
+        <div class="c-ring"></div>
+        <div class="c-text">Reading…</div>
       </div>
     </div>
-  </div>
-
-  <div class="panel" id="panel-generate">
-    <div class="sec-label">New Ticket</div>
-    <div class="form-group">
-      <label class="form-label">Name</label>
-      <input class="form-input" type="text" id="f-name" placeholder="Full name...">
-    </div>
-    <div class="type-grid">
-      <div class="type-pill sel" data-val="Normal Guest" onclick="selType(this)">GUEST</div>
-      <div class="type-pill" data-val="VIP" onclick="selType(this)">VIP</div>
-      <div class="type-pill" data-val="VIP WITH DINNER" onclick="selType(this)">VIP+D</div>
-    </div>
-    <button class="btn-gen" onclick="generateQR()">Generate</button>
-    <div id="qr-output" style="text-align:center;margin-top:20px">
-      <div id="qr-canvas" style="display:flex;justify-content:center"></div>
-    </div>
+    <p style="text-align:center;font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:-4px">Point camera at ticket QR</p>
   </div>
 
   <div class="panel" id="panel-guestlist">
-    <div class="sec-label">Recent Entries</div>
-    <div id="full-list"></div>
+    <div class="gl-top">
+      <div>
+        <div class="gl-title">Guest Log</div>
+        <div class="gl-meta" id="gl-meta">0 checked in</div>
+      </div>
+      <button class="btn-clr" onclick="clearList()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Clear
+      </button>
+    </div>
+    <div class="gl-sec">
+      <div class="gl-hd vp">
+        <div class="gl-hd-lbl">⭐ VIP &amp; Special</div>
+        <div class="gl-cnt" id="cnt-vip">0</div>
+      </div>
+      <div class="gl-body" id="list-vip"><div class="gl-empty">No VIP guests yet</div></div>
+    </div>
+    <div class="gl-sec">
+      <div class="gl-hd nm">
+        <div class="gl-hd-lbl">👥 General Guests</div>
+        <div class="gl-cnt" id="cnt-nm">0</div>
+      </div>
+      <div class="gl-body" id="list-nm"><div class="gl-empty">No general guests yet</div></div>
+    </div>
   </div>
+
+  <div class="panel" id="panel-settings">
+    <div class="sec-label">Preferences</div>
+    <div class="s-section">
+      <div class="s-title">Haptic &amp; Sound</div>
+      <div class="s-row">
+        <div class="s-info">
+          <div class="s-name">Vibration on confirm</div>
+          <div class="s-desc">Buzz when entry is confirmed</div>
+        </div>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="vib-toggle" checked onchange="saveVib()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <div class="s-row" id="vib-pattern-row">
+        <div class="s-info">
+          <div class="s-name">VIP double pulse</div>
+          <div class="s-desc">VIP & Dinner = 2 buzzes · General = 1</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2A9B5A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="test-btns" id="vib-test-wrap">
+        <button class="test-btn" onclick="testVib('normal')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Normal ×1
+        </button>
+        <button class="test-btn gold" onclick="testVib('vip')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          VIP ×2
+        </button>
+      </div>
+      <p class="s-note">Requires a supported mobile browser.<br>On iOS, silent mode must be off.</p>
+    </div>
+  </div>
+
 </div>
 
 <nav class="nav">
-  <button class="nav-btn active" onclick="switchTab('scanner',this)">SCAN</button>
-  <button class="nav-btn" onclick="switchTab('generate',this)">CREATE</button>
-  <button class="nav-btn" onclick="switchTab('guestlist',this)">LIST</button>
+   <button class="nav-btn active" onclick="switchTab('scanner',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+    <div class="nav-label">Scan</div>
+  </button>
+  <button class="nav-btn" onclick="switchTab('generate',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="2" height="2"/><rect x="19" y="19" width="2" height="2"/></svg>
+    <div class="nav-label">Create</div>
+  </button>
+  <button class="nav-btn" onclick="switchTab('guestlist',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+    <div class="nav-label">Guests</div>
+  </button>
+  <button class="nav-btn" onclick="switchTab('settings',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <div class="nav-label">Settings</div>
+  </button>
 </nav>
 
 <div class="overlay" id="overlay">
-  <div class="modal" id="modal">
+  <div class="modal nm" id="modal">
+    <div class="m-pill"></div>
     <div class="m-hero">
+      <div id="m-glow"></div>
+      <div class="m-emoji" id="m-emoji"></div>
       <div class="m-name" id="m-name"></div>
       <div class="m-badge" id="m-badge"></div>
+      <div class="m-time" id="m-time"></div>
     </div>
-    <button class="btn-confirm" id="m-ok" onclick="confirmScan()">Confirm Entry</button>
-    <button class="btn-skip" onclick="dismissScan()">Dismiss</button>
+    <div class="m-div"></div>
+    <div class="m-btns">
+      <button class="btn-confirm c-nm" id="m-ok" onclick="confirmScan()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirm Entry
+      </button>
+      <button class="btn-skip" onclick="dismissScan()">Dismiss</button>
+    </div>
   </div>
 </div>
 
 <script>
-let scanner=null, cooling=false, pending=null;
+let scanner=null,cooling=false,pending=null;
 let total=parseInt(localStorage.getItem('sl_scans')||'0');
 let log=JSON.parse(localStorage.getItem('sl_log')||'[]');
-let _ctx=null;
+let vibOn=localStorage.getItem('sl_vib')!=='false';
 
-// --- AUDIO & HAPTIC ENGINE ---
-function getCtx() {
+// Audio
+let _ctx=null;
+function getCtx(){
   if(!_ctx) _ctx=new(window.AudioContext||window.webkitAudioContext)();
   if(_ctx.state==='suspended') _ctx.resume();
   return _ctx;
 }
+document.addEventListener('touchstart',()=>{try{getCtx()}catch(e){}},{once:true});
+document.addEventListener('click',()=>{try{getCtx()}catch(e){}},{once:true});
 
-function playBeep(type) {
-  try {
-    const c=getCtx(), o=c.createOscillator(), g=c.createGain();
-    o.connect(g); g.connect(c.destination);
-    if(type==='vip') {
-      o.frequency.setValueAtTime(880, c.currentTime);
-      o.frequency.setValueAtTime(1100, c.currentTime+0.1);
-      g.gain.setValueAtTime(0.5, c.currentTime);
-      o.start(); o.stop(c.currentTime+0.3);
+function playBeep(type){
+  try{
+    const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    if(type==='vip'){
+      o.frequency.setValueAtTime(880,c.currentTime);
+      o.frequency.setValueAtTime(1100,c.currentTime+.13);
+      g.gain.setValueAtTime(.5,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);
+      o.start(c.currentTime);o.stop(c.currentTime+.4);
     } else {
-      o.frequency.setValueAtTime(660, c.currentTime);
-      g.gain.setValueAtTime(0.4, c.currentTime);
-      o.start(); o.stop(c.currentTime+0.2);
+      o.frequency.setValueAtTime(880,c.currentTime);
+      g.gain.setValueAtTime(.5,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.22);
+      o.start(c.currentTime);o.stop(c.currentTime+.22);
     }
-  } catch(e){}
+  }catch(e){}
+}
+function buzz(type){
+  if(!vibOn||!navigator.vibrate) return;
+  navigator.vibrate(type==='vip'?[120,80,120]:[150]);
 }
 
-function buzz(type) {
-  if(navigator.vibrate) {
-    if(type==='vip') navigator.vibrate([100, 50, 100]);
-    else navigator.vibrate(150);
-  }
-}
-
-// --- CORE APP LOGIC ---
+// Init
 document.getElementById('scan-count').textContent=total;
 document.getElementById('stat-total').textContent=total;
-startScanner();
+document.getElementById('stat-vip').textContent=log.filter(g=>g.t!=='Normal Guest').length;
+document.getElementById('vib-toggle').checked=vibOn;
+updateVibUI();
+startScanner(); // Auto-start on load
 
+// Type picker
+let selTypeVal='Normal Guest';
 function selType(el){
   document.querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));
-  el.classList.add('sel'); 
-  window.selTypeVal=el.dataset.val;
+  el.classList.add('sel'); selTypeVal=el.dataset.val;
 }
 
+// Generate QR
 function generateQR(){
-  const name=document.getElementById('f-name').value;
-  const val=window.selTypeVal||'Normal Guest';
+  const name=document.getElementById('f-name').value.trim();
+  if(!name) return alert('Enter a name');
+  document.getElementById('qr-output').style.display='block';
+  document.getElementById('t-name').textContent=name;
+  document.getElementById('t-type').textContent=selTypeVal;
+  const isVip=selTypeVal!=='Normal Guest';
+  const lbl=document.getElementById('t-type-lbl');
+  lbl.textContent=isVip?'✦ Special Access':'General Admission';
+  lbl.className='qr-card-type '+(isVip?'vip':'normal');
   const c=document.getElementById('qr-canvas'); c.innerHTML='';
-  new QRCode(c,{text:JSON.stringify({n:name,t:val}),width:180,height:180});
+  new QRCode(c,{text:JSON.stringify({n:name,t:selTypeVal}),width:200,height:200,colorDark:'#1A1209',colorLight:'#ffffff'});
 }
 
+// Tab switch
 function switchTab(id,el){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  if(id==='scanner') startScanner(); else stopScanner();
+  if(id==='scanner'){startScanner();updateStats();}
+  else stopScanner();
   if(id==='guestlist') renderList();
 }
-
-function startScanner(){
-  if(scanner) return;
-  scanner=new Html5Qrcode('reader');
-  scanner.start({facingMode:'environment'},{fps:10,qrbox:250},txt=>{
-    if(cooling) return;
-    cooling=true;
-    try{
-      pending=JSON.parse(txt);
-      document.getElementById('cooldown').classList.add('on');
-      setTimeout(openModal, 500);
-    }catch(e){cooling=false;}
-  });
-}
-
-function stopScanner(){if(scanner){scanner.stop();scanner=null;}}
-
-function openModal(){
-  const isVip=pending.t!=='Normal Guest';
-  document.getElementById('m-name').textContent=pending.n;
-  const b=document.getElementById('m-badge');
-  b.textContent=pending.t;
-  b.className='m-badge '+(isVip?'b-vp':'b-nm');
-  document.getElementById('m-ok').className='btn-confirm '+(isVip?'c-vp':'c-nm');
-  document.getElementById('overlay').classList.add('show');
-}
-
-function confirmScan(){
-  const isVip=pending.t!=='Normal Guest';
-  
-  // TRIGGER HAPTIC AND SOUND
-  buzz(isVip?'vip':'normal');
-  playBeep(isVip?'vip':'normal');
-
-  total++;
-  log.unshift({n:pending.n, t:pending.t, time:new Date().toLocaleTimeString()});
-  localStorage.setItem('sl_scans', total);
-  localStorage.setItem('sl_log', JSON.stringify(log));
-  
+function updateStats(){
   document.getElementById('scan-count').textContent=total;
   document.getElementById('stat-total').textContent=total;
   document.getElementById('stat-vip').textContent=log.filter(g=>g.t!=='Normal Guest').length;
-  
+}
+
+// Scanner
+function startScanner(){
+  if(scanner) return;
+  scanner=new Html5Qrcode('reader');
+  scanner.start({facingMode:'environment'},{fps:10,qrbox:220},txt=>{
+    if(cooling) return;
+    try{onDetect(JSON.parse(txt));}catch(e){}
+  });
+}
+function stopScanner(){if(scanner){scanner.stop().catch(()=>{});scanner=null;}}
+function onDetect(data){
+  cooling=true;pending=data;
+  document.getElementById('cooldown').classList.add('on');
+  setTimeout(()=>openModal(data),900);
+}
+
+// Modal
+function openModal(data){
+  const isd=data.t==='VIP WITH DINNER',isv=data.t==='VIP',isS=isv||isd;
+  document.getElementById('m-emoji').textContent=isd?'🍽️':isv?'⭐':'🎟️';
+  document.getElementById('m-name').textContent=data.n;
+  document.getElementById('m-time').textContent='Scanned at '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const b=document.getElementById('m-badge');
+  b.className='m-badge '+(isd?'b-dn':isv?'b-vp':'b-nm');
+  b.textContent=isd?'✦ VIP · Dinner Included':isv?'✦ VIP Guest':'General Admission';
+  document.getElementById('m-ok').className='btn-confirm '+(isS?'c-vp':'c-nm');
+  document.getElementById('modal').className='modal '+(isS?'vp':'nm');
+  document.getElementById('m-glow').className=isS?'m-hero-glow-vp':'m-hero-glow-nm';
+  document.getElementById('overlay').classList.add('show');
+}
+function confirmScan(){
+  if(!pending) return;
+  total++;
+  localStorage.setItem('sl_scans',total);
+  log.push({n:pending.n,t:pending.t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+  localStorage.setItem('sl_log',JSON.stringify(log));
+  const isVip=pending.t==='VIP'||pending.t==='VIP WITH DINNER';
+  buzz(isVip?'vip':'normal');
+  playBeep(isVip?'vip':'normal');
+  updateStats();
   closeModal();
 }
-
-function dismissScan(){ closeModal(); }
+function dismissScan(){closeModal();}
 function closeModal(){
   document.getElementById('overlay').classList.remove('show');
-  setTimeout(()=>{
-    document.getElementById('cooldown').classList.remove('on');
-    cooling=false;
-  },1000);
+  setTimeout(()=>{document.getElementById('cooldown').classList.remove('on');cooling=false;pending=null;},2000);
 }
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)dismissScan();});
 
+// Guest list
 function renderList(){
-  const el=document.getElementById('full-list');
-  el.innerHTML=log.map(g=>`
+  const vips=log.filter(g=>g.t!=='Normal Guest');
+  const nrms=log.filter(g=>g.t==='Normal Guest');
+  document.getElementById('cnt-vip').textContent=vips.length;
+  document.getElementById('cnt-nm').textContent=nrms.length;
+  document.getElementById('gl-meta').textContent=log.length+' checked in';
+  renderSec('list-vip',vips,true);
+  renderSec('list-nm',nrms,false);
+}
+function renderSec(id,list,isVip){
+  const el=document.getElementById(id);
+  if(!list.length){el.innerHTML=`<div class="gl-empty">${isVip?'No VIP guests yet':'No general guests yet'}</div>`;return;}
+  el.innerHTML=list.map((g,i)=>`
     <div class="gl-row">
-      <div style="flex:1"><b>${g.n}</b><br><small>${g.t}</small></div>
-      <div style="font-size:10px">${g.time}</div>
+      <div class="gl-num ${isVip?'g':'n'}">${i+1}</div>
+      <div class="gl-info"><div class="gl-rname">${g.n}</div><div class="gl-rtype">${g.t}</div></div>
+      <div class="gl-rtime">${g.time}</div>
     </div>`).join('');
 }
+function clearList(){
+  if(!confirm('Clear the entire guest log?')) return;
+  log=[];total=0;
+  localStorage.removeItem('sl_log');
+  localStorage.setItem('sl_scans','0');
+  updateStats();renderList();
+}
+
+// Settings
+function saveVib(){
+  vibOn=document.getElementById('vib-toggle').checked;
+  localStorage.setItem('sl_vib',vibOn);
+  updateVibUI();
+}
+function updateVibUI(){
+  const row=document.getElementById('vib-pattern-row');
+  const wrap=document.getElementById('vib-test-wrap');
+  [row,wrap].forEach(el=>{el.style.opacity=vibOn?'1':'.3';el.style.pointerEvents=vibOn?'all':'none';});
+}
+function testVib(type){buzz(type);playBeep(type);}
 </script>
 </body>
 </html>
