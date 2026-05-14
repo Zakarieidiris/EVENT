@@ -38,7 +38,7 @@ input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;m
 .scanner-wrap{position:relative;border-radius:12px;overflow:hidden}
 .cooldown-overlay{
   position:absolute;inset:0;border-radius:12px;
-  background:rgba(26,18,9,.72);
+  background:rgba(0,0,0,.88);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   z-index:10;opacity:0;pointer-events:none;transition:opacity .3s;
 }
@@ -264,13 +264,13 @@ input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;m
           <div class="setting-desc">Vibrate when a QR is confirmed</div>
         </div>
         <label class="toggle-wrap">
-          <input type="checkbox" id="vib-toggle" onchange="saveVibSetting()">
+          <input type="checkbox" id="vib-toggle" checked onchange="saveVibSetting()">
           <div class="toggle-track"></div>
           <div class="toggle-thumb"></div>
         </label>
       </div>
 
-      <div class="setting-row" id="vib-pattern-row" style="opacity:.4;pointer-events:none">
+      <div class="setting-row" id="vib-pattern-row" style="opacity:1;pointer-events:all">
         <div class="setting-label">
           <div class="setting-title">VIP double pulse</div>
           <div class="setting-desc">Normal = 1 short buzz &nbsp;·&nbsp; VIP &amp; Dinner = 2 buzzes</div>
@@ -279,7 +279,7 @@ input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;m
       </div>
     </div>
 
-    <div id="vib-test-wrap" style="display:none">
+    <div id="vib-test-wrap" style="display:block">
       <div style="font-size:13px;color:var(--muted);margin-bottom:8px;text-align:center">Test vibration patterns</div>
       <div class="vib-demo">
         <button onclick="testVib('normal')"><i class="ti ti-device-mobile-vibration"></i> Normal (×1)</button>
@@ -298,7 +298,35 @@ input,select{width:100%;padding:0.8rem;border:1px solid #ddd;border-radius:8px;m
 let scanner = null, cooling = false, pending = null;
 let total = parseInt(localStorage.getItem('sl_scans') || '0');
 let log   = JSON.parse(localStorage.getItem('sl_log')  || '[]');
-let vibOn = localStorage.getItem('sl_vib') === 'true';
+// Default haptic ON (only false if explicitly saved as 'false')
+let vibOn = localStorage.getItem('sl_vib') !== 'false';
+
+// AudioContext beep — works on iOS/Android without external URL
+function playBeep(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === 'vip') {
+      // Two-tone chime for VIP
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.35);
+    } else {
+      // Single clean beep for normal
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+    }
+  } catch(e) {}
+}
 
 document.getElementById('scan-count').textContent = total;
 
@@ -372,7 +400,10 @@ function stopScanner() {
 function onDetect(data) {
   cooling=true; pending=data;
   document.getElementById('cooldown').classList.add('on');
-  try{ new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); }catch(e){}
+  // Fire haptic + beep immediately on every scan detection
+  const isVip = data.t === 'VIP' || data.t === 'VIP WITH DINNER';
+  buzz(isVip ? 'vip' : 'normal');
+  playBeep(isVip ? 'vip' : 'normal');
   // 1-second pause, then show popup
   setTimeout(()=>openModal(data), 1000);
 }
@@ -380,6 +411,7 @@ function onDetect(data) {
 function openModal(data) {
   const isd = data.t==='VIP WITH DINNER';
   const isv = data.t==='VIP';
+  const isSpecial = isv || isd;
   document.getElementById('m-emoji').textContent = isd?'🍽️': isv?'⭐':'✅';
   document.getElementById('m-name').textContent  = data.n;
   document.getElementById('m-time').textContent  = 'Scanned at '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -387,7 +419,16 @@ function openModal(data) {
   b.className='m-badge '+(isd?'badge-d':isv?'badge-v':'badge-n');
   b.textContent = isd?'VIP · Dinner Included': isv?'VIP Guest':'Normal Guest';
   const ok=document.getElementById('m-ok');
-  ok.className='btn-ok'+(isv||isd?' gold-ok':'');
+  ok.className='btn-ok'+(isSpecial?' gold-ok':'');
+  // Golden bg for VIP/Special, default surface for Normal
+  const modal = document.querySelector('.modal');
+  if (isSpecial) {
+    modal.style.background = 'linear-gradient(145deg,#FDF1C8,#F5D78E)';
+    modal.style.borderColor = '#C9921A';
+  } else {
+    modal.style.background = '';
+    modal.style.borderColor = '';
+  }
   document.getElementById('overlay').classList.add('show');
 }
 
@@ -398,9 +439,6 @@ function confirmScan() {
   document.getElementById('scan-count').textContent=total;
   log.push({n:pending.n,t:pending.t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
   localStorage.setItem('sl_log',JSON.stringify(log));
-  // Haptic feedback — 1 pulse normal, 2 pulses VIP
-  const isVip = pending.t==='VIP' || pending.t==='VIP WITH DINNER';
-  buzz(isVip ? 'vip' : 'normal');
   closeModal();
 }
 
